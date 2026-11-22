@@ -76,6 +76,11 @@ En iOS, `speechSynthesis` solo ofrece a las webs voces básicas (las Mejoradas/P
 - Se pide `navigator.storage.persist()` para que el navegador no borre el progreso ni los audios.
 - Sincronizar entre dispositivos sigue pendiente: habría que sustituir `initRemote()` por un servicio externo (Firebase, Supabase…).
 
+## Pruebas
+- `tools/test_e2e.py`: prueba de punta a punta en Chromium sin interfaz (Playwright). Comprueba el service worker, que se guarden los 253 audios, las fuentes locales, las peticiones Range, el sonido en todos los juegos y el panel de padres, y luego repite todo sin conexión. Instalación en el propio script. Ejecutarla tras cada cambio: `~/.venvs/juego-lectura/bin/python tools/test_e2e.py`.
+- En las capturas, los emojis salen como cuadros porque el Chromium de WSL no tiene fuente de emojis; en el iPhone se ven bien.
+- Andika solo se descarga cuando hay en pantalla algo con la clase `.L`; para comprobarla hay que usar `document.fonts.load()`, no `check()`.
+
 ## Restricciones de diseño
 - Público: niño de 4–5 años que aún no lee instrucciones. Todo debe entenderse con audio e iconos.
 - Botones grandes, solo toques (nada de arrastrar ni trazar).
