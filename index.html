@@ -12,7 +12,7 @@
 html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:'Nunito',system-ui,sans-serif}
 body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
 button{font-family:inherit;color:inherit;cursor:pointer}
-.screen{display:none;flex-direction:column;padding:14px;gap:16px;max-width:560px;margin:0 auto;min-height:100vh}
+.screen{display:none;flex-direction:column;padding:14px;gap:16px;max-width:560px;margin:0 auto;min-height:100vh;min-height:100dvh}
 .screen.on{display:flex}
 .L{font-family:var(--letter);font-weight:700}
 header{display:flex;align-items:center;justify-content:space-between;gap:8px}
@@ -42,6 +42,7 @@ h1{font-size:28px;margin:4px 0 0;text-align:center}
 .chip{min-width:62px;height:62px;border-radius:18px;border:none;font-size:36px;background:#fff;box-shadow:0 4px 0 rgba(0,0,0,.1)}
 .chip.sel{outline:4px solid var(--ink)}
 .chip.c{color:var(--a)}.chip.v{color:var(--b)}
+.chip.off{opacity:.2;pointer-events:none}
 /* caza */
 .bubbles{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
 .bubble{width:120px;height:120px;border-radius:50%;border:none;font-size:52px;color:#fff;box-shadow:inset -8px -10px 0 rgba(0,0,0,.12),0 6px 0 rgba(0,0,0,.12)}
@@ -170,7 +171,7 @@ input[type=range]{width:100%}
     <h3>Voz</h3>
     <label>Velocidad: <b id="rateVal"></b></label>
     <input type="range" id="setRate" min="0.5" max="1.1" step="0.05">
-    <label>Voz en español:</label>
+    <label>Voz del sistema (solo si falta algún audio):</label>
     <div class="seg" id="setVoice"></div>
     <button class="big" id="testVoice" style="background:var(--b);font-size:18px">🔊 Probar voz</button>
     <p class="hint" id="voiceInfo" style="text-align:left;margin:0"></p>
@@ -184,42 +185,16 @@ input[type=range]{width:100%}
 <div id="party"></div>
 <div id="modal"><div class="box"><div class="petbig" id="mPet"></div><h2 style="margin:6px 0">¡Nuevo amigo!</h2><button class="big" id="mOk">¡Bien! 🎉</button></div></div>
 
+<script src="data.js"></script>
 <script>
-const VOWELS=['A','E','I','O','U'];
-const ALL_CONS=['B','C','CH','D','F','G','H','J','K','L','LL','M','N','Ñ','P','Q','R','RR','S','T','V','W','X','Y','Z'];
-const CONTINUANT={M:'mmm',L:'lll',S:'sss',N:'nnn',F:'fff',Z:'zzz',J:'jjj'};
+/* letras, palabras y frases: en data.js (lo comparte el generador de audios) */
+const {VOWELS,ALL_CONS,CONTINUANT,WORDS,PHRASES}=window.DATA;
 const COLORS=['#FF7A59','#3DB5E6','#5DBB63','#F7B731','#A77BDB','#F06292'];
 const PETS=['🐣','🐢','🦖','🐙','🦄','🐳','🦊','🐝','🦉','🐬','🦋','🐲','🦔','🐧','🦁','🐼','🦩','🐨','🦕','🐞'];
 const PER_PET=5;
-const WORDS=[
- {w:'MAMÁ',s:['MA','MÁ'],e:'👩'},{w:'PAPÁ',s:['PA','PÁ'],e:'👨'},{w:'PATO',s:['PA','TO'],e:'🦆'},
- {w:'TOMATE',s:['TO','MA','TE'],e:'🍅'},{w:'MALETA',s:['MA','LE','TA'],e:'🧳'},{w:'PELOTA',s:['PE','LO','TA'],e:'⚽'},
- {w:'PALOMA',s:['PA','LO','MA'],e:'🕊️'},{w:'PATATA',s:['PA','TA','TA'],e:'🥔'},{w:'LUPA',s:['LU','PA'],e:'🔍'},
- {w:'MAPA',s:['MA','PA'],e:'🗺️'},{w:'MOTO',s:['MO','TO'],e:'🏍️'},{w:'LATA',s:['LA','TA'],e:'🥫'},
- {w:'SAPO',s:['SA','PO'],e:'🐸'},{w:'SOPA',s:['SO','PA'],e:'🍲'},{w:'SETA',s:['SE','TA'],e:'🍄'},
- {w:'LUNA',s:['LU','NA'],e:'🌙'},{w:'MONO',s:['MO','NO'],e:'🐒'},{w:'MANO',s:['MA','NO'],e:'✋'},
- {w:'PINO',s:['PI','NO'],e:'🌲'},{w:'DADO',s:['DA','DO'],e:'🎲'},{w:'DEDO',s:['DE','DO'],e:'☝️'},
- {w:'LIMÓN',s:['LI','MÓN'],e:'🍋'},{w:'MELÓN',s:['ME','LÓN'],e:'🍈'},{w:'SANDÍA',s:['SAN','DÍ','A'],e:'🍉'},
- {w:'BOTA',s:['BO','TA'],e:'👢'},{w:'BEBÉ',s:['BE','BÉ'],e:'👶'},{w:'BALLENA',s:['BA','LLE','NA'],e:'🐳'},{w:'BOCA',s:['BO','CA'],e:'👄'},{w:'BÚHO',s:['BÚ','HO'],e:'🦉'},
- {w:'CASA',s:['CA','SA'],e:'🏠'},{w:'CAMA',s:['CA','MA'],e:'🛏️'},{w:'COCO',s:['CO','CO'],e:'🥥'},{w:'CUCHARA',s:['CU','CHA','RA'],e:'🥄'},{w:'CEBOLLA',s:['CE','BO','LLA'],e:'🧅'},
- {w:'CABALLO',s:['CA','BA','LLO'],e:'🐴'},{w:'COHETE',s:['CO','HE','TE'],e:'🚀'},{w:'CHOCOLATE',s:['CHO','CO','LA','TE'],e:'🍫'},{w:'COCHE',s:['CO','CHE'],e:'🚗'},{w:'LECHE',s:['LE','CHE'],e:'🥛'},
- {w:'DELFÍN',s:['DEL','FÍN'],e:'🐬'},{w:'FOCA',s:['FO','CA'],e:'🦭'},{w:'FUEGO',s:['FUE','GO'],e:'🔥'},{w:'FRESA',s:['FRE','SA'],e:'🍓'},
- {w:'GATO',s:['GA','TO'],e:'🐱'},{w:'GORILA',s:['GO','RI','LA'],e:'🦍'},{w:'GALLETA',s:['GA','LLE','TA'],e:'🍪'},{w:'GUITARRA',s:['GUI','TA','RRA'],e:'🎸'},
- {w:'HUEVO',s:['HUE','VO'],e:'🥚'},{w:'HELADO',s:['HE','LA','DO'],e:'🍦'},{w:'HADA',s:['HA','DA'],e:'🧚'},{w:'HOJA',s:['HO','JA'],e:'🍃'},
- {w:'JIRAFA',s:['JI','RA','FA'],e:'🦒'},{w:'KIWI',s:['KI','WI'],e:'🥝'},{w:'KOALA',s:['KO','A','LA'],e:'🐨'},
- {w:'LORO',s:['LO','RO'],e:'🦜'},{w:'LEÓN',s:['LE','ÓN'],e:'🦁'},{w:'LLAVE',s:['LLA','VE'],e:'🔑'},{w:'LLUVIA',s:['LLU','VIA'],e:'🌧️'},
- {w:'MANZANA',s:['MAN','ZA','NA'],e:'🍎'},{w:'MOCHILA',s:['MO','CHI','LA'],e:'🎒'},{w:'NUBE',s:['NU','BE'],e:'☁️'},{w:'NARIZ',s:['NA','RIZ'],e:'👃'},{w:'NIDO',s:['NI','DO'],e:'🪺'},
- {w:'PIÑA',s:['PI','ÑA'],e:'🍍'},{w:'NIÑO',s:['NI','ÑO'],e:'👦'},{w:'ARAÑA',s:['A','RA','ÑA'],e:'🕷️'},
- {w:'PERRO',s:['PE','RRO'],e:'🐶'},{w:'PEZ',s:['PEZ'],e:'🐟'},{w:'PAN',s:['PAN'],e:'🍞'},{w:'PALOMITAS',s:['PA','LO','MI','TAS'],e:'🍿'},{w:'QUESO',s:['QUE','SO'],e:'🧀'},
- {w:'RATÓN',s:['RA','TÓN'],e:'🐭'},{w:'ROSA',s:['RO','SA'],e:'🌹'},{w:'REGALO',s:['RE','GA','LO'],e:'🎁'},{w:'RELOJ',s:['RE','LOJ'],e:'⌚'},{w:'TORRE',s:['TO','RRE'],e:'🗼'},
- {w:'SOL',s:['SOL'],e:'☀️'},{w:'SILLA',s:['SI','LLA'],e:'🪑'},{w:'TORTUGA',s:['TOR','TU','GA'],e:'🐢'},{w:'TAZA',s:['TA','ZA'],e:'☕'},{w:'TIGRE',s:['TI','GRE'],e:'🐯'},
- {w:'TELÉFONO',s:['TE','LÉ','FO','NO'],e:'☎️'},{w:'VACA',s:['VA','CA'],e:'🐮'},{w:'VELA',s:['VE','LA'],e:'🕯️'},{w:'UVA',s:['U','VA'],e:'🍇'},
- {w:'TAXI',s:['TA','XI'],e:'🚕'},{w:'YOYÓ',s:['YO','YÓ'],e:'🪀'},{w:'YATE',s:['YA','TE'],e:'🛥️'},
- {w:'ZAPATO',s:['ZA','PA','TO'],e:'👞'},{w:'ZORRO',s:['ZO','RRO'],e:'🦊'},{w:'ZANAHORIA',s:['ZA','NA','HO','RIA'],e:'🥕'}
-];
 
 /* ---------- estado ---------- */
-const DEF={cons:['M','P','L','T'],kase:'upper',font:'Andika',rate:0.8,stars:0,voiceURI:null};
+const DEF={cons:['M','P','L','T'],kase:'upper',font:'Andika',rate:0.8,stars:0,voiceURI:null,resetAt:0};
 let S=Object.assign({},DEF);
 try{const raw=localStorage.getItem('lecturaCasa');if(raw)S=Object.assign({},DEF,JSON.parse(raw));}catch(e){}
 /* guardado: local + base de datos del artefacto (persistente entre sesiones y dispositivos) */
@@ -236,12 +211,14 @@ async function initRemote(){try{
   const ref=db.doc('data/users/'+id+'/progreso');
   const snap=await Promise.race([ref.get(),new Promise((_,r)=>setTimeout(()=>r('timeout'),10000))]);
   const d=snap.exists?(snap.data()||{}):null;
-  if(d){const localStars=S.stars;S=Object.assign({},DEF,S,d);if(!Array.isArray(S.cons)||!S.cons.length)S.cons=DEF.cons.slice();S.stars=Math.max(localStars,+d.stars||0);}
+  if(d){const loc=S,rAt=+d.resetAt||0,lAt=+loc.resetAt||0,rStars=+d.stars||0;S=Object.assign({},DEF,loc,d);if(!Array.isArray(S.cons)||!S.cons.length)S.cons=DEF.cons.slice();
+    /* si un lado se reinició después que el otro, gana ese lado; si no, el mayor */
+    S.stars=rAt>lAt?rStars:lAt>rAt?loc.stars:Math.max(loc.stars,rStars);S.resetAt=Math.max(rAt,lAt);}
   remote=ref;
   try{localStorage.setItem('lecturaCasa',JSON.stringify(S));}catch(e){}
   renderStars();applyLook();pickVoice();
   if(document.getElementById('amigos').classList.contains('on'))renderPets();
-  if(!d||S.stars!==(+d.stars||0)){dirty=true;flush();}
+  if(!d||S.stars!==(+d.stars||0)||S.resetAt!==(+d.resetAt||0)){dirty=true;flush();}
 }catch(e){}}
 
 const $=id=>document.getElementById(id);
@@ -251,6 +228,9 @@ function tokens(w){w=strip(w);const t=[];for(let i=0;i<w.length;i++){const two=w
   if(two==='QU'){t.push('Q');i++;continue;}
   if(two==='GU'&&'EI'.includes(w[i+2]||'_')){t.push('G');i++;continue;}
   t.push(w[i]);}return t;}
+/* clave de sonido: dos sílabas con la misma clave suenan igual (BA/VA, CA/KA, QUE/KE, GE/JE, CE/ZE, LLA/YA, HA/A, RA/RRA) */
+const sound=s=>strip(s).replace(/CH/g,'Ç').replace(/QU(?=[EI])/g,'K').replace(/C(?=[AOU])/g,'K').replace(/C(?=[EI])/g,'Z')
+  .replace(/G(?=[EI])/g,'J').replace(/GU(?=[EI])/g,'G').replace(/LL/g,'Y').replace(/RR/g,'R').replace(/V/g,'B').replace(/H/g,'');
 const syl=(c,v)=>c==='Q'?('EI'.includes(v)?'QU'+v:null):c+v;
 const consOf=s=>s.slice(0,-1);
 const fmt=t=>S.kase==='lower'?t.toLowerCase():t;
@@ -267,14 +247,48 @@ const esVoices=()=>hasTTS?speechSynthesis.getVoices().filter(v=>/^es/i.test(v.la
 function pickVoice(){if(!hasTTS)return;const vs=esVoices();voice=vs.find(v=>v.voiceURI===S.voiceURI)||vs.find(v=>v.lang==='es-ES'&&GOOD.test(v.name))||vs.find(v=>v.lang==='es-ES')||vs[0]||null;
   if(document.getElementById('padres').classList.contains('on'))renderPadres();}
 if(hasTTS){pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}
-let modalOn=false,sayT=null;
-function say(t,rate,force){if(!hasTTS)return;if(modalOn&&!force)return;
-  try{clearTimeout(sayT);const busy=speechSynthesis.speaking||speechSynthesis.pending;speechSynthesis.cancel();
-    const go=()=>{const u=new SpeechSynthesisUtterance(t.toLowerCase());u.lang='es-ES';if(voice)u.voice=voice;u.rate=rate||S.rate;speechSynthesis.speak(u);};
-    /* iOS se come la frase si se habla justo después de cancelar: pequeña pausa */
-    if(busy)sayT=setTimeout(go,150);else go();}catch(e){}}
+/* Audios pregenerados (tools/generar_audios.py). Si hay MP3 para un texto se reproduce;
+   si no, se usa la voz del sistema (speechSynthesis) como respaldo. */
+let AUDIOS=new Map();/* clave -> huella (cambia al regenerar el audio) */
+/* nombre de archivo: DEBE coincidir con clave() de tools/generar_audios.py */
+const akey=t=>t.toLowerCase().normalize('NFC').replace(/ñ/g,'ny').replace(/á/g,'a_').replace(/é/g,'e_').replace(/í/g,'i_').replace(/ó/g,'o_').replace(/ú/g,'u_').replace(/ü/g,'u').replace(/[^a-z_]+/g,'-').replace(/^-+|-+$/g,'');
+const audioUrl=k=>'audio/'+k+'.mp3'+(AUDIOS.get(k)?'?v='+AUDIOS.get(k):'');
+fetch('audio/manifest.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null).then(m=>{if(!m||!Array.isArray(m.files))return;
+  const h=m.huellas||{};AUDIOS=new Map(m.files.map(k=>[k,h[k]||'']));prefetchAudios();
+  if(document.getElementById('padres').classList.contains('on'))renderPadres();}).catch(()=>{});
+/* precarga los audios de las letras activas para que suenen sin retraso */
+function prefetchAudios(){if(!AUDIOS.size)return;const t=new Set([...VOWELS,...sylPool(),...Object.values(PHRASES)]);
+  S.cons.forEach(c=>CONTINUANT[c]&&t.add(CONTINUANT[c]));availWords().forEach(w=>{t.add(w.w);w.s.forEach(s=>t.add(s));});
+  [...t].map(akey).filter(k=>AUDIOS.has(k)).forEach(k=>{try{fetch(audioUrl(k),{priority:'low'}).catch(()=>{});}catch(e){}});}
+/* un único elemento <audio> reutilizado: iOS solo deja reproducir sin toque si ya se desbloqueó con uno */
+const player=new Audio();player.preload='auto';
+const SILENCE='data:audio/wav;base64,UklGRnQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YVAAAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==';
+let modalOn=false,sayT=null,sayGen=0;
+function stopVoice(){sayGen++;clearTimeout(sayT);player.onended=player.onerror=null;try{player.pause();}catch(e){}if(hasTTS)try{speechSynthesis.cancel();}catch(e){}}
+function say(t,rate,force){sayAll([t],rate,force);}
+/* dice varios textos seguidos (p. ej. «¡Muy bien!» + «pa»), con una pausa de gap ms entre ellos */
+function sayAll(parts,rate,force,gap){if(modalOn&&!force)return;
+  const busy=hasTTS&&(speechSynthesis.speaking||speechSynthesis.pending);stopVoice();const g=sayGen;rate=rate||S.rate;let i=0;
+  const next=()=>{if(g!==sayGen||i>=parts.length)return;const t=parts[i++];
+    sayOne(t,rate,g,()=>{if(g===sayGen&&i<parts.length)sayT=setTimeout(next,gap||120);});};
+  /* iOS se come la frase si se habla justo después de cancelar: pequeña pausa */
+  if(busy)sayT=setTimeout(next,150);else next();}
+function sayOne(t,rate,g,done){const k=akey(t);
+  if(!AUDIOS.has(k)){ttsOne(t,rate,g,done);return;}
+  let fell=false;const fall=()=>{if(fell||g!==sayGen)return;fell=true;player.onended=player.onerror=null;ttsOne(t,rate,g,done);};
+  try{player.onended=()=>{if(g===sayGen)done();};player.onerror=fall;player.src=audioUrl(k);
+    /* la velocidad del panel (0,8 = normal) acelera o frena el audio sin cambiar el tono */
+    const r=Math.min(1.6,Math.max(0.5,rate/DEF.rate));player.defaultPlaybackRate=r;player.playbackRate=r;
+    player.preservesPitch=true;player.webkitPreservesPitch=true;
+    const p=player.play();if(p&&p.catch)p.catch(fall);}catch(e){fall();}}
+function ttsOne(t,rate,g,done){if(!hasTTS||g!==sayGen){done();return;}
+  try{const u=new SpeechSynthesisUtterance(t.toLowerCase());u.lang='es-ES';if(voice)u.voice=voice;u.rate=rate;
+    u.onend=u.onerror=()=>{if(g===sayGen)done();};speechSynthesis.speak(u);}catch(e){done();}}
 let warmed=false;
-document.addEventListener('pointerdown',()=>{if(warmed||!hasTTS)return;warmed=true;try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u);}catch(e){}},{once:false});
+document.addEventListener('pointerdown',()=>{if(warmed)return;warmed=true;
+  /* desbloquea el audio en iOS con el primer toque */
+  try{player.src=SILENCE;const p=player.play();if(p&&p.catch)p.catch(()=>{});}catch(e){}
+  if(hasTTS)try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u);}catch(e){}},{capture:true});
 
 /* ---------- navegación ---------- */
 let current='home';
@@ -287,8 +301,8 @@ document.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>{if(hasTTS)spe
 function renderStars(){document.querySelectorAll('[data-stars]').forEach(e=>e.textContent='⭐ '+S.stars);}
 function addStar(){S.stars++;save();renderStars();
   if(S.stars%PER_PET===0&&S.stars/PER_PET<=PETS.length){const p=PETS[S.stars/PER_PET-1];modalOn=true;
-    setTimeout(()=>{$('mPet').textContent=p;$('modal').classList.add('on');say('¡Tienes un nuevo amigo!',0.85,true);},1200);}}
-$('mPet').onclick=()=>say('¡Tienes un nuevo amigo!',0.85,true);
+    setTimeout(()=>{$('mPet').textContent=p;$('modal').classList.add('on');say(PHRASES.nuevoAmigo,0.85,true);},1200);}}
+$('mPet').onclick=()=>say(PHRASES.nuevoAmigo,0.85,true);
 $('mOk').onclick=()=>{$('modal').classList.remove('on');modalOn=false;
   /* retomar el juego: repetir lo que toca oír */
   setTimeout(()=>{if(current==='caza'&&cTarget)say(cTarget);else if(current==='palabra'&&pWord)say(pWord.w,S.rate*0.9);},250);};
@@ -298,54 +312,69 @@ function renderPets(){const n=Math.min(Math.floor(S.stars/PER_PET),PETS.length);
   $('petHint').textContent=n>=PETS.length?'¡Los tienes todos!':`Te faltan ${PER_PET-rest} ⭐ para un nuevo amigo`;}
 
 /* ---------- TREN ---------- */
-let tC=null,tV=null,tJoins=0;
+/* tSeen: sílabas distintas formadas en esta visita a la web; 1 ⭐ cada 3 nuevas */
+let tC=null,tV=null;const tSeen=new Set();
+function refreshVows(){$('vowRow').querySelectorAll('.chip').forEach(x=>x.classList.toggle('off',!!tC&&!syl(tC,x.dataset.v)));}
 function initTren(){tC=null;tV=null;$('wag1').textContent='?';$('wag2').textContent='?';$('train').classList.remove('joined');
   $('consRow').innerHTML=S.cons.map(c=>`<button class="chip c L" data-c="${c}">${fmt(c==='Q'?'QU':c)}</button>`).join('');
   $('vowRow').innerHTML=VOWELS.map(v=>`<button class="chip v L" data-v="${v}">${fmt(v)}</button>`).join('');
   $('consRow').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{tC=b.dataset.c;$('wag1').textContent=fmt(tC==='Q'?'QU':tC);$('train').classList.remove('joined');
-    $('consRow').querySelectorAll('.chip').forEach(x=>x.classList.toggle('sel',x===b));if(CONTINUANT[tC])say(CONTINUANT[tC],0.6);});
+    $('consRow').querySelectorAll('.chip').forEach(x=>x.classList.toggle('sel',x===b));
+    /* QU solo va con E/I: si la vocal elegida no vale, se quita */
+    if(tV&&!syl(tC,tV)){tV=null;$('wag2').textContent='?';$('vowRow').querySelectorAll('.chip').forEach(x=>x.classList.remove('sel'));}
+    refreshVows();if(CONTINUANT[tC])say(CONTINUANT[tC],0.6);});
   $('vowRow').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{tV=b.dataset.v;$('wag2').textContent=fmt(tV);$('train').classList.remove('joined');
     $('vowRow').querySelectorAll('.chip').forEach(x=>x.classList.toggle('sel',x===b));say(tV);});}
 $('wag1').onclick=()=>{if(tC&&CONTINUANT[tC])say(CONTINUANT[tC],0.6);};
 $('wag2').onclick=()=>{if(tV)say(tV);};
 $('join').onclick=()=>{if(!tC||!tV||!syl(tC,tV)){$('join').classList.add('shake');setTimeout(()=>$('join').classList.remove('shake'),400);return;}
-  const tr=$('train');tr.classList.remove('joined');void tr.offsetWidth;tr.classList.add('joined');say(syl(tC,tV),S.rate*0.85);
-  tJoins++;if(tJoins%3===0){addStar();party();}};
+  const s=syl(tC,tV);const tr=$('train');tr.classList.remove('joined');void tr.offsetWidth;tr.classList.add('joined');say(s,S.rate*0.85);
+  if(!tSeen.has(s)){tSeen.add(s);if(tSeen.size%3===0){addStar();party();}}};
 
 /* ---------- CAZA ---------- */
-let cTarget=null,cRound=0,cBusy=false;
+let cTarget=null,cLast=null,cRound=0,cBusy=false,cMiss=0;
 function initCaza(){cRound=0;nextCaza();}
-function nextCaza(){cBusy=false;const pool=sylPool();const n=cRound<5?2:3;cTarget=rnd(pool);
-  const opts=[cTarget];
-  const sameC=shuffle(pool.filter(s=>s!==cTarget&&consOf(s)===consOf(cTarget)));
-  if(sameC.length)opts.push(sameC[0]);
-  shuffle(pool.filter(s=>!opts.includes(s))).forEach(s=>{if(opts.length<n)opts.push(s);});
-  const sh=shuffle(opts.slice(0,n));
+function nextCaza(){cBusy=false;cMiss=0;const pool=sylPool();const n=cRound<5?2:3;
+  let cand=pool.filter(s=>s!==cLast);if(!cand.length)cand=pool;cTarget=rnd(cand);cLast=cTarget;
+  /* nunca dos opciones que suenen igual */
+  const opts=[cTarget],heard=new Set([sound(cTarget)]);
+  const add=s=>{if(opts.length<n&&!heard.has(sound(s))){heard.add(sound(s));opts.push(s);}};
+  const sameC=shuffle(pool.filter(s=>consOf(s)===consOf(cTarget))).find(s=>!heard.has(sound(s)));
+  if(sameC)add(sameC);
+  shuffle(pool).forEach(add);
+  const sh=shuffle(opts);
   $('bubbles').innerHTML=sh.map((s,i)=>`<button class="bubble L" data-s="${s}" style="background:${COLORS[(i+cRound)%COLORS.length]}">${fmt(s)}</button>`).join('');
   $('bubbles').querySelectorAll('.bubble').forEach(b=>b.onclick=()=>{if(cBusy)return;
-    if(b.dataset.s===cTarget){cBusy=true;b.classList.add('ok');say('¡Muy bien! '+cTarget.toLowerCase(),0.9);addStar();party();cRound++;setTimeout(nextCaza,1600);}
-    else{b.classList.add('shake');setTimeout(()=>b.classList.remove('shake'),400);say(cTarget);}});
+    if(b.dataset.s===cTarget){cBusy=true;b.classList.add('ok');sayAll([PHRASES.muyBien,cTarget],0.9);
+      /* la estrella solo si acierta a la primera */
+      if(!cMiss){addStar();party();}cRound++;setTimeout(nextCaza,1600);}
+    else{cMiss++;b.classList.add('shake');setTimeout(()=>b.classList.remove('shake'),400);say(cTarget);}});
   setTimeout(()=>{if(current==='caza')say(cTarget);},350);}
 $('cazaSay').onclick=()=>say(cTarget);
 
 /* ---------- PALABRA ---------- */
-let pWord=null,pNext=0,pLast=null,pBusy=false;
-function newWord(){pBusy=false;const ws=availWords();
+let pWord=null,pNext=0,pLast=null,pBusy=false,pMiss=0;
+function newWord(){pBusy=false;pMiss=0;const ws=availWords();
   if(!ws.length){$('pic').textContent='🙈';$('slots').innerHTML='';$('tiles').innerHTML='<p class="hint">Aún no hay palabras con estas letras. Activa más consonantes en ajustes.</p>';return;}
   let c=ws.filter(w=>w!==pLast);if(!c.length)c=ws;pWord=rnd(c);pLast=pWord;pNext=0;
   $('pic').textContent=pWord.e;
   $('slots').innerHTML=pWord.s.map(()=>'<div class="slot"></div>').join('');
-  const inWord=new Set(pWord.s.map(strip));
-  const extra=shuffle(sylPool().filter(s=>!inWord.has(s))).slice(0,pWord.s.length>2?2:1);
+  /* distractoras que no suenen como ninguna sílaba de la palabra ni entre sí */
+  const heard=new Set(pWord.s.map(sound)),k=pWord.s.length>2?2:1,extra=[];
+  shuffle(sylPool()).forEach(s=>{if(extra.length<k&&!heard.has(sound(s))){heard.add(sound(s));extra.push(s);}});
   const tiles=shuffle([...pWord.s,...extra]);
   $('tiles').innerHTML=tiles.map((s,i)=>`<button class="tile L" data-s="${s}" style="background:${COLORS[i%COLORS.length]}">${fmt(s)}</button>`).join('');
   $('tiles').querySelectorAll('.tile').forEach(b=>b.onclick=()=>tapTile(b));
   setTimeout(()=>{if(current==='palabra')say(pWord.w,S.rate*0.9);},350);}
 function tapTile(b){if(pBusy)return;const need=pWord.s[pNext];
   if(strip(b.dataset.s)===strip(need)){b.classList.add('used');const sl=$('slots').children[pNext];sl.textContent=fmt(need);sl.classList.add('full');pNext++;
-    if(pNext===pWord.s.length){pBusy=true;setTimeout(()=>say(pWord.w,S.rate*0.9),150);addStar();party();setTimeout(newWord,2300);}
+    if(pNext===pWord.s.length){pBusy=true;const w=pWord.w;
+      /* force: la palabra suena aunque se vaya a mostrar un amigo nuevo */
+      setTimeout(()=>say(w,S.rate*0.9,true),150);
+      /* estrella si la completa con 1 fallo como mucho */
+      if(pMiss<=1){addStar();party();}setTimeout(newWord,2300);}
     else say(need);}
-  else{b.classList.add('shake');setTimeout(()=>b.classList.remove('shake'),400);say(need);}}
+  else{pMiss++;b.classList.add('shake');setTimeout(()=>b.classList.remove('shake'),400);say(need);}}
 $('pic').onclick=()=>pWord&&say(pWord.w,S.rate*0.9);
 
 /* ---------- LEE Y ELIGE ---------- */
@@ -359,10 +388,10 @@ function newLee(){lBusy=false;lFails=0;const ws=availWords();
   $('leeWord').textContent=fmt(lWord.w);
   $('leeOpts').innerHTML=opts.map(w=>`<button class="bubble" data-w="${w.w}" style="background:#fff;font-size:64px">${w.e}</button>`).join('');
   $('leeOpts').querySelectorAll('.bubble').forEach(b=>b.onclick=()=>{if(lBusy)return;
-    if(b.dataset.w===lWord.w){lBusy=true;b.classList.add('ok');say('¡Muy bien! '+lWord.w,0.9);addStar();party();setTimeout(newLee,1900);}
+    if(b.dataset.w===lWord.w){lBusy=true;b.classList.add('ok');sayAll([PHRASES.muyBien,lWord.w],0.9);if(!lFails){addStar();party();}setTimeout(newLee,1900);}
     else{b.classList.add('shake');setTimeout(()=>b.classList.remove('shake'),400);lFails++;
       /* tras dos fallos, ayuda: se leen las sílabas despacio */
-      if(lFails>=2)say(lWord.s.join(', '),S.rate*0.75);}});}
+      if(lFails>=2)sayAll(lWord.s,S.rate*0.75,false,350);}});}
 
 /* ---------- PADRES ---------- */
 let pressT=null;const gear=$('gear');
@@ -374,18 +403,21 @@ function applyLook(){document.documentElement.style.setProperty('--letter',S.fon
 function renderPadres(){resetArmed=false;$('reset').textContent='Reiniciar estrellas y amigos';
   $('setCons').innerHTML=ALL_CONS.map(c=>`<button data-c="${c}" class="${S.cons.includes(c)?'sel':''}">${c} ${c.toLowerCase()}</button>`).join('');
   $('setCons').querySelectorAll('button').forEach(b=>b.onclick=()=>{const c=b.dataset.c;
-    if(S.cons.includes(c)){if(S.cons.length===1)return;S.cons=S.cons.filter(x=>x!==c);}else S.cons=ALL_CONS.filter(x=>S.cons.includes(x)||x===c);save();renderPadres();});
+    if(S.cons.includes(c)){if(S.cons.length===1)return;S.cons=S.cons.filter(x=>x!==c);}else S.cons=ALL_CONS.filter(x=>S.cons.includes(x)||x===c);save();renderPadres();prefetchAudios();});
   $('setCase').querySelectorAll('button').forEach(b=>{b.classList.toggle('sel',b.dataset.v===S.kase);b.onclick=()=>{S.kase=b.dataset.v;save();renderPadres();};});
   $('setFont').querySelectorAll('button').forEach(b=>{b.classList.toggle('sel',b.dataset.v===S.font);b.onclick=()=>{S.font=b.dataset.v;save();applyLook();renderPadres();};});
   $('setRate').value=S.rate;$('rateVal').textContent=S.rate.toFixed(2);
   const vs=esVoices();
   $('setVoice').innerHTML=vs.length?vs.map((v,i)=>`<button data-i="${i}" class="${voice&&v.voiceURI===voice.voiceURI?'sel':''}">${v.name} (${v.lang})</button>`).join(''):'<span class="hint">No hay voces en español en este móvil.</span>';
-  $('setVoice').querySelectorAll('button').forEach(b=>b.onclick=()=>{const v=vs[+b.dataset.i];voice=v;S.voiceURI=v.voiceURI;save();renderPadres();say('Hola, ¡vamos a leer! ma, pa, mamá');});
+  $('setVoice').querySelectorAll('button').forEach(b=>b.onclick=()=>{const v=vs[+b.dataset.i];voice=v;S.voiceURI=v.voiceURI;save();renderPadres();stopVoice();ttsOne('Hola, ¡vamos a leer! ma, pa, mamá',S.rate,sayGen,()=>{});});
   const n=availWords().length;
-  $('voiceInfo').textContent=(!hasTTS?'Este navegador no tiene voz sintética.':voice?`Voz: ${voice.name} (${voice.lang}).`:'No se encontró voz en español; se usará la predeterminada.')+` Palabras disponibles con estas letras: ${n}.`;}
+  const need=new Set([...VOWELS,...sylPool()]);availWords().forEach(w=>{need.add(w.w);w.s.forEach(x=>need.add(x));});
+  const miss=[...need].filter(t=>!AUDIOS.has(akey(t)));
+  const audioTxt=AUDIOS.size?(miss.length?`Audios grabados: ${AUDIOS.size}. Faltan ${miss.length} con estas letras (${miss.slice(0,6).join(', ')}…): se usará la voz del sistema.`:`Audios grabados: ${AUDIOS.size}. Todo lo de estas letras tiene audio.`):'No se han encontrado audios grabados: se usa la voz del sistema.';
+  $('voiceInfo').textContent=audioTxt+' '+(!hasTTS?'Este navegador no tiene voz sintética.':voice?`Voz del sistema: ${voice.name} (${voice.lang}).`:'No se encontró voz del sistema en español.')+` Palabras disponibles con estas letras: ${n}.`;}
 $('setRate').oninput=e=>{S.rate=+e.target.value;$('rateVal').textContent=S.rate.toFixed(2);save();};
-$('testVoice').onclick=()=>say('ma, me, mi, mo, mu. ¡Mamá!');
-$('reset').onclick=()=>{if(!resetArmed){resetArmed=true;$('reset').textContent='¿Seguro? Pulsa otra vez';return;}S.stars=0;save();renderStars();renderPadres();};
+$('testVoice').onclick=()=>sayAll(['MA','ME','MI','MO','MU','MAMÁ'],null,false,250);
+$('reset').onclick=()=>{if(!resetArmed){resetArmed=true;$('reset').textContent='¿Seguro? Pulsa otra vez';return;}S.stars=0;S.resetAt=Date.now();save();renderStars();renderPadres();};
 
 applyLook();renderStars();initRemote();
 </script>
