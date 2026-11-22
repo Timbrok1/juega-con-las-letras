@@ -2,6 +2,11 @@
 
 Web para que un niño de Infantil practique lectoescritura en casa, siguiendo el ritmo del método Cokitos del colegio. Se usa en el móvil (iPhone), con el dedo.
 
+## Repositorio y publicación
+- GitHub (público): https://github.com/Timbrok1/juega-con-las-letras
+- Web (GitHub Pages, rama `main`, raíz): https://timbrok1.github.io/juega-con-las-letras/
+- En GitHub Pages `window.claude` no existe: el progreso solo se guarda en `localStorage`.
+
 ## Estado actual
 
 Todo está en un único `index.html` (HTML + CSS + JS, sin build ni dependencias). Solo carga de fuera las fuentes Andika y Nunito desde Google Fonts.

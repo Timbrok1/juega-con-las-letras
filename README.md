@@ -2,6 +2,8 @@
 
 Web para que un niño de Infantil practique lectoescritura en casa, desde el móvil y con el dedo.
 
+**Jugar:** https://timbrok1.github.io/juega-con-las-letras/
+
 ## Juegos
 - **Tren de sílabas**: junta consonante + vocal y escucha la sílaba.
 - **Caza la sílaba**: escucha una sílaba y toca la burbuja correcta.
@@ -20,3 +22,6 @@ python3 -m http.server 8000
 ```
 
 El progreso se guarda en `localStorage` del navegador.
+
+## Publicación
+Se publica con GitHub Pages desde la rama `main` (carpeta raíz). Cada `git push` actualiza la web en uno o dos minutos.
