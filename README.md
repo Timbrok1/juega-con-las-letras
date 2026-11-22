@@ -14,7 +14,7 @@ Web para que un niño de Infantil practique lectoescritura en casa, desde el mó
 Panel de padres: mantener pulsado ⚙️ 1,5 s (letras activas, mayúsculas/minúsculas, fuente, voz y progreso).
 
 ## Uso
-Es una web estática sin dependencias (`index.html`, `data.js` y la carpeta `audio/`). Hay que servirla con un servidor estático (por ejemplo GitHub Pages): abriendo el archivo directamente, los audios no cargan y se usa la voz del sistema.
+Es una web estática sin dependencias ni recursos externos (`index.html`, `data.js`, `audio/`, `fonts/`, `icons/` y el service worker `sw.js`). Hay que servirla con un servidor estático (por ejemplo GitHub Pages): abriendo el archivo directamente, los audios no cargan y se usa la voz del sistema.
 
 ```bash
 python3 -m http.server 8000
@@ -22,6 +22,9 @@ python3 -m http.server 8000
 ```
 
 El progreso se guarda en `localStorage` del navegador.
+
+### Instalar en el iPhone
+Abre la web en Safari → **Compartir** → **Añadir a pantalla de inicio**. Se abre a pantalla completa y, tras la primera carga con internet, funciona sin conexión (guarda los audios en el móvil). La app instalada lleva su propio progreso, distinto del de Safari.
 
 ## Audios
 Todo lo que dice el juego está pregrabado en `audio/` con [Piper](https://github.com/OHF-Voice/piper1-gpl) (voz neuronal local y gratuita). Al añadir palabras o frases en `data.js`, regenera lo que falte:

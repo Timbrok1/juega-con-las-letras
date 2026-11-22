@@ -9,7 +9,13 @@ Web para que un niño de Infantil practique lectoescritura en casa, siguiendo el
 
 ## Estado actual
 
-Sin build ni dependencias: `index.html` (HTML + CSS + JS), `data.js` (letras, palabras y frases, en JSON dentro de `window.DATA=`) y `audio/` (MP3 pregenerados). Solo carga de fuera las fuentes Andika y Nunito desde Google Fonts.
+Sin build ni dependencias y sin nada cargado de fuera:
+- `index.html`: HTML + CSS + JS del juego.
+- `data.js`: letras, palabras y frases, en JSON dentro de `window.DATA=`.
+- `audio/`: MP3 pregenerados y `manifest.json`.
+- `fonts/`: Andika 700 y Nunito (variable) en woff2, alojadas aquí con sus licencias OFL.
+- `icons/` y `manifest.webmanifest`: app instalable. Los iconos se dibujan con `tools/generar_iconos.py` (Pillow).
+- `sw.js`: service worker para usarla sin conexión.
 
 ### Juegos
 - **Tren de sílabas**: elige consonante + vocal, pulsa «Juntar» y suena la sílaba. 1 ⭐ cada 3 sílabas *distintas* (en `tSeen`, se reinicia al recargar la web). Con QU se desactivan A, O y U.
@@ -56,6 +62,19 @@ En iOS, `speechSynthesis` solo ofrece a las webs voces básicas (las Mejoradas/P
 - **En el juego**: `say(t)` / `sayAll([partes], rate, force, gap)`. Usan un único elemento `<audio>` reutilizado, que se desbloquea en iOS con el primer toque (silencio). Si no hay MP3 para un texto o falla la reproducción, se usa `speechSynthesis`. La velocidad del panel se aplica con `playbackRate` (0,8 = normal), conservando el tono. `stopVoice()` corta lo que suene; `sayGen` invalida las colas anteriores. Al arrancar se precargan los audios de las letras activas.
 - «¡Muy bien!» + sílaba/palabra y la ayuda de «Lee y elige» (sílabas despacio) se dicen con `sayAll` como archivos seguidos.
 - La voz del sistema elegida en el panel de padres solo se usa como respaldo.
+
+## App instalable y sin conexión (PWA)
+- En el iPhone: Safari → Compartir → «Añadir a pantalla de inicio». Abre a pantalla completa. **La app instalada tiene su propio `localStorage`, distinto del de Safari**: el progreso no pasa de uno a otro.
+- `sw.js`:
+  - Archivos de la app (`index.html`, `data.js`, manifest…): primero la red, con 3 s de margen; si no, la caché. Los cambios publicados llegan solos sin tocar `VERSION`.
+  - Audios: primero la caché `media`. La URL lleva `?v=<huella>`, así que un audio regenerado se descarga de nuevo.
+  - Fuentes e iconos: primero la caché.
+  - Al arrancar, la página manda `'sync'` al service worker, que descarga los audios que falten (6 a la vez) y borra los que ya no estén en el manifest. Va informando del progreso con `postMessage({type:'audio',done,total})`.
+  - Safari pide los audios por trozos (`Range`): `media()` responde con 206. Si se toca, no romper esto o los audios no sonarán sin conexión en iOS.
+  - **Subir `VERSION` en `sw.js` si cambia el propio `sw.js` o la lista `APP`** (por ejemplo, al añadir un archivo nuevo a la app).
+- El panel de padres muestra cómo instalarla y si ya está lista para usar sin conexión (cuenta lo que hay en la caché `media`).
+- Se pide `navigator.storage.persist()` para que el navegador no borre el progreso ni los audios.
+- Sincronizar entre dispositivos sigue pendiente: habría que sustituir `initRemote()` por un servicio externo (Firebase, Supabase…).
 
 ## Restricciones de diseño
 - Público: niño de 4–5 años que aún no lee instrucciones. Todo debe entenderse con audio e iconos.

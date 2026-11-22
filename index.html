@@ -4,9 +4,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>Juega con las letras</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+<!-- app instalable (pantalla de inicio) -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#FF7A59">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Letras">
+<link rel="preload" href="fonts/andika-700.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+/* fuentes alojadas en la propia web (licencia OFL, ver fonts/) para que funcionen sin conexión */
+@font-face{font-family:'Andika';font-weight:700;font-style:normal;font-display:swap;src:url(fonts/andika-700.woff2) format('woff2')}
+@font-face{font-family:'Nunito';font-weight:200 1000;font-style:normal;font-display:swap;src:url(fonts/nunito.woff2) format('woff2')}
 :root{--bg:#FFF8EC;--ink:#2B2B3A;--a:#FF7A59;--b:#3DB5E6;--c:#5DBB63;--d:#F7B731;--e:#A77BDB;--letter:'Andika',sans-serif}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:'Nunito',system-ui,sans-serif}
@@ -175,6 +185,11 @@ input[type=range]{width:100%}
     <div class="seg" id="setVoice"></div>
     <button class="big" id="testVoice" style="background:var(--b);font-size:18px">🔊 Probar voz</button>
     <p class="hint" id="voiceInfo" style="text-align:left;margin:0"></p>
+  </div>
+  <div class="panel">
+    <h3>Instalar y usar sin conexión</h3>
+    <p class="hint" id="installInfo" style="text-align:left;margin:0;opacity:.85;font-size:15px"></p>
+    <p class="hint" id="offlineInfo" style="text-align:left;margin:0;opacity:.85;font-size:15px"></p>
   </div>
   <div class="panel">
     <h3>Progreso</h3>
@@ -414,10 +429,37 @@ function renderPadres(){resetArmed=false;$('reset').textContent='Reiniciar estre
   const need=new Set([...VOWELS,...sylPool()]);availWords().forEach(w=>{need.add(w.w);w.s.forEach(x=>need.add(x));});
   const miss=[...need].filter(t=>!AUDIOS.has(akey(t)));
   const audioTxt=AUDIOS.size?(miss.length?`Audios grabados: ${AUDIOS.size}. Faltan ${miss.length} con estas letras (${miss.slice(0,6).join(', ')}…): se usará la voz del sistema.`:`Audios grabados: ${AUDIOS.size}. Todo lo de estas letras tiene audio.`):'No se han encontrado audios grabados: se usa la voz del sistema.';
+  renderInstall();
   $('voiceInfo').textContent=audioTxt+' '+(!hasTTS?'Este navegador no tiene voz sintética.':voice?`Voz del sistema: ${voice.name} (${voice.lang}).`:'No se encontró voz del sistema en español.')+` Palabras disponibles con estas letras: ${n}.`;}
 $('setRate').oninput=e=>{S.rate=+e.target.value;$('rateVal').textContent=S.rate.toFixed(2);save();};
 $('testVoice').onclick=()=>sayAll(['MA','ME','MI','MO','MU','MAMÁ'],null,false,250);
 $('reset').onclick=()=>{if(!resetArmed){resetArmed=true;$('reset').textContent='¿Seguro? Pulsa otra vez';return;}S.stars=0;S.resetAt=Date.now();save();renderStars();renderPadres();};
+
+/* ---------- app instalable y sin conexión ---------- */
+const standalone=()=>navigator.standalone===true||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches);
+let offline={done:0,total:0};
+function renderInstall(){
+  $('installInfo').innerHTML=standalone()
+    ?'✅ Está instalada en la pantalla de inicio.'
+    :'Para instalarla en el iPhone: ábrela en <b>Safari</b>, pulsa <b>Compartir</b> (el cuadrado con la flecha ⬆️) y elige <b>«Añadir a pantalla de inicio»</b>. Se abrirá a pantalla completa y funcionará sin internet.<br>Ojo: la app instalada guarda su propio progreso, distinto del de Safari.';
+  const o=$('offlineInfo');
+  if(!('serviceWorker' in navigator)||!navigator.serviceWorker.controller){o.textContent='Sin conexión: aún no disponible (se activa al recargar la página con internet).';return;}
+  if(!offline.total){o.textContent='Sin conexión: comprobando audios guardados…';countCached();return;}
+  o.textContent=offline.done>=offline.total?`✅ Lista para usar sin conexión (${offline.total} audios guardados en el móvil).`:`Guardando audios en el móvil: ${offline.done} de ${offline.total}…`;}
+/* cuenta los audios ya guardados en la caché del service worker */
+function countCached(){if(!window.caches||!AUDIOS.size)return;
+  caches.open('media').then(c=>c.keys()).then(ks=>{const have=new Set(ks.map(r=>r.url));
+    let n=0;AUDIOS.forEach((h,k)=>{if(have.has(new URL(audioUrl(k),location.href).href))n++;});
+    offline={done:n,total:AUDIOS.size};if(current==='padres')renderInstall();}).catch(()=>{});}
+if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').then(()=>navigator.serviceWorker.ready)
+    /* pide al service worker que descargue los audios que falten */
+    .then(r=>{if(r.active)r.active.postMessage('sync');}).catch(()=>{});});
+  navigator.serviceWorker.addEventListener('message',e=>{const d=e.data||{};
+    if(d.type==='audio'){offline={done:d.done,total:d.total};if(current==='padres')renderInstall();}});
+  /* pide al navegador que no borre los datos guardados (progreso y audios) */
+  try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch(e){}
+}
 
 applyLook();renderStars();initRemote();
 </script>
