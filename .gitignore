@@ -1,0 +1,27 @@
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.vscode/
+.idea/
+*.swp
+
+# Claude Code (ajustes locales)
+.claude/settings.local.json
+
+# Node / Python (script de audios)
+node_modules/
+__pycache__/
+.venv/
+*.pyc
+
+# Secretos (claves de APIs de voz)
+.env
+.env.*
+*.key
+credentials*.json
+
+# Temporales del generador de audio
+audio/.tmp/

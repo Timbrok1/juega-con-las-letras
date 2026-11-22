@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Juega con las letras</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#FFF8EC;--ink:#2B2B3A;--a:#FF7A59;--b:#3DB5E6;--c:#5DBB63;--d:#F7B731;--e:#A77BDB;--letter:'Andika',sans-serif}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:'Nunito',system-ui,sans-serif}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+button{font-family:inherit;color:inherit;cursor:pointer}
+.screen{display:none;flex-direction:column;padding:14px;gap:16px;max-width:560px;margin:0 auto;min-height:100vh}
+.screen.on{display:flex}
+.L{font-family:var(--letter);font-weight:700}
+header{display:flex;align-items:center;justify-content:space-between;gap:8px}
+header h2{margin:0;font-size:20px;text-align:center;flex:1}
+.icon-btn{width:54px;height:54px;border-radius:18px;border:none;background:#fff;font-size:26px;box-shadow:0 4px 0 rgba(0,0,0,.08);flex:none}
+.stars{font-size:20px;font-weight:800;background:#fff;padding:12px 14px;border-radius:18px;box-shadow:0 4px 0 rgba(0,0,0,.08);white-space:nowrap}
+h1{font-size:28px;margin:4px 0 0;text-align:center}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.game-btn{border:none;border-radius:26px;padding:16px 8px;color:#fff;font-size:19px;font-weight:800;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 6px 0 rgba(0,0,0,.15);min-height:150px;justify-content:center;line-height:1.15}
+.game-btn span{font-size:56px}
+.wide{grid-column:1/3;min-height:90px;flex-direction:row;gap:12px}
+.wide span{font-size:40px}
+.big{border:none;border-radius:22px;padding:16px 22px;font-size:24px;font-weight:800;color:#fff;background:var(--c);box-shadow:0 6px 0 rgba(0,0,0,.15)}
+.game-btn:active,.tile:active,.big:active,.chip:active,.bubble:active,.icon-btn:active{transform:translateY(3px)}
+.center{display:flex;flex-direction:column;align-items:center;gap:16px;flex:1;justify-content:center}
+.hint{font-size:14px;opacity:.6;text-align:center}
+/* tren */
+.train{display:flex;align-items:flex-end;justify-content:center;height:130px;gap:30px;transition:gap .5s}
+.train.joined{gap:2px}
+.loco{font-size:70px;line-height:1}
+.wagon{width:96px;height:96px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:58px;color:#fff;position:relative;border:none;box-shadow:0 6px 0 rgba(0,0,0,.15)}
+.wagon::after{content:'● ●';position:absolute;bottom:-20px;font-size:18px;color:#444;letter-spacing:22px;font-family:sans-serif}
+.w1{background:var(--a)}.w2{background:var(--b)}
+.train.joined .wagon{animation:bump .5s}
+@keyframes bump{50%{transform:scale(1.12)}}
+.row{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.chip{min-width:62px;height:62px;border-radius:18px;border:none;font-size:36px;background:#fff;box-shadow:0 4px 0 rgba(0,0,0,.1)}
+.chip.sel{outline:4px solid var(--ink)}
+.chip.c{color:var(--a)}.chip.v{color:var(--b)}
+/* caza */
+.bubbles{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+.bubble{width:120px;height:120px;border-radius:50%;border:none;font-size:52px;color:#fff;box-shadow:inset -8px -10px 0 rgba(0,0,0,.12),0 6px 0 rgba(0,0,0,.12)}
+.speaker{font-size:64px;width:120px;height:120px;border-radius:50%;border:none;background:#fff;box-shadow:0 6px 0 rgba(0,0,0,.1)}
+.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-10px)}40%,80%{transform:translateX(10px)}}
+.ok{background:var(--c)!important;animation:pop .5s}
+@keyframes pop{50%{transform:scale(1.2)}}
+/* palabra */
+.pic{font-size:110px;line-height:1;background:#fff;border:none;border-radius:30px;padding:16px 26px;box-shadow:0 6px 0 rgba(0,0,0,.08)}
+.slots{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.slot{min-width:84px;height:84px;border-radius:18px;border:4px dashed #c9c0ae;display:flex;align-items:center;justify-content:center;font-size:44px;padding:0 6px}
+.slot.full{border:4px solid var(--c);background:#fff}
+.tiles{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.tile{min-width:88px;height:88px;border-radius:20px;border:none;font-size:44px;color:#fff;box-shadow:0 6px 0 rgba(0,0,0,.15);padding:0 10px}
+.tile.used{visibility:hidden}
+/* amigos */
+.pets{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.pet{aspect-ratio:1;border-radius:18px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:44px;box-shadow:0 4px 0 rgba(0,0,0,.06)}
+.pet.lock{opacity:.35;font-size:30px}
+.bar{height:22px;background:#eee3cf;border-radius:11px;overflow:hidden}
+.bar div{height:100%;background:var(--d);transition:width .4s}
+/* padres */
+.panel{background:#fff;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.panel h3{margin:0;font-size:17px}
+.seg{display:flex;gap:8px;flex-wrap:wrap}
+.seg button{border:2px solid #ddd;background:#fff;border-radius:12px;padding:10px 14px;font-size:16px;font-weight:700}
+.seg button.sel{border-color:var(--ink);background:var(--ink);color:#fff}
+input[type=range]{width:100%}
+/* fiesta */
+#party{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:50}
+#party span{position:absolute;bottom:-60px;font-size:40px;animation:up 1.6s ease-out forwards}
+@keyframes up{to{transform:translateY(-110vh) rotate(360deg);opacity:.2}}
+#modal{position:fixed;inset:0;background:rgba(43,43,58,.55);display:none;align-items:center;justify-content:center;z-index:60;padding:20px}
+#modal.on{display:flex}
+#modal .box{background:#fff;border-radius:28px;padding:26px;text-align:center;max-width:320px;width:100%}
+#modal .box .petbig{font-size:110px;animation:pop .8s}
+</style>
+</head>
+<body>
+
+<!-- INICIO -->
+<section class="screen on" id="home">
+  <header>
+    <button class="icon-btn" id="gear" aria-label="Padres (mantén pulsado)">⚙️</button>
+    <div class="stars" data-stars>⭐ 0</div>
+  </header>
+  <h1>¡A jugar con las letras!</h1>
+  <div class="grid">
+    <button class="game-btn" style="background:var(--a)" data-go="tren"><span>🚂</span>Tren de sílabas</button>
+    <button class="game-btn" style="background:var(--b)" data-go="caza"><span>🫧</span>Caza la sílaba</button>
+    <button class="game-btn" style="background:var(--c)" data-go="palabra"><span>🧩</span>Construye la palabra</button>
+    <button class="game-btn" style="background:var(--e)" data-go="lee"><span>📖</span>Lee y elige</button>
+    <button class="game-btn wide" style="background:var(--d)" data-go="amigos"><span>🐣</span>Mis amigos</button>
+  </div>
+  <p class="hint">Padres: mantén pulsado ⚙️ para elegir las letras que ya ha dado en clase.</p>
+</section>
+
+<!-- TREN -->
+<section class="screen" id="tren">
+  <header><button class="icon-btn" data-back>⬅️</button><h2>Tren de sílabas</h2><div class="stars" data-stars></div></header>
+  <div class="center">
+    <div class="train" id="train">
+      <div class="loco">🚂</div>
+      <button class="wagon w1 L" id="wag1">?</button>
+      <button class="wagon w2 L" id="wag2">?</button>
+    </div>
+    <div class="row" id="consRow"></div>
+    <div class="row" id="vowRow"></div>
+    <button class="big" id="join">🔗 ¡Juntar!</button>
+  </div>
+</section>
+
+<!-- CAZA -->
+<section class="screen" id="caza">
+  <header><button class="icon-btn" data-back>⬅️</button><h2>Caza la sílaba</h2><div class="stars" data-stars></div></header>
+  <div class="center">
+    <button class="speaker" id="cazaSay">🔊</button>
+    <div class="bubbles" id="bubbles"></div>
+  </div>
+</section>
+
+<!-- PALABRA -->
+<section class="screen" id="palabra">
+  <header><button class="icon-btn" data-back>⬅️</button><h2>Construye la palabra</h2><div class="stars" data-stars></div></header>
+  <div class="center" id="palWrap">
+    <button class="pic" id="pic"></button>
+    <div class="slots L" id="slots"></div>
+    <div class="tiles" id="tiles"></div>
+  </div>
+</section>
+
+<!-- LEE -->
+<section class="screen" id="lee">
+  <header><button class="icon-btn" data-back>⬅️</button><h2>Lee y elige</h2><div class="stars" data-stars></div></header>
+  <div class="center">
+    <div class="pic L" id="leeWord" style="font-size:64px;letter-spacing:2px;padding:18px 30px"></div>
+    <p class="hint" style="margin:0">¿Qué dibujo es?</p>
+    <div class="bubbles" id="leeOpts"></div>
+  </div>
+</section>
+
+<!-- AMIGOS -->
+<section class="screen" id="amigos">
+  <header><button class="icon-btn" data-back>⬅️</button><h2>Mis amigos</h2><div class="stars" data-stars></div></header>
+  <div class="bar"><div id="petBar"></div></div>
+  <p class="hint" id="petHint" style="opacity:.8;font-size:16px;margin:0"></p>
+  <div class="pets" id="pets"></div>
+</section>
+
+<!-- PADRES -->
+<section class="screen" id="padres">
+  <header><button class="icon-btn" data-back>⬅️</button><h2>Ajustes para padres</h2><span style="width:54px"></span></header>
+  <div class="panel">
+    <h3>Consonantes que ya conoce</h3>
+    <div class="seg L" id="setCons"></div>
+    <p class="hint" style="text-align:left;margin:0">Las vocales están siempre activas. Marca solo las letras dadas en clase.</p>
+  </div>
+  <div class="panel">
+    <h3>Tipo de letra</h3>
+    <div class="seg" id="setCase"><button data-v="upper">MAYÚSCULAS</button><button data-v="lower">minúsculas</button></div>
+    <div class="seg" id="setFont"><button data-v="Andika">Andika</button><button data-v="Nunito">Nunito</button><button data-v="system-ui">Del sistema</button></div>
+    <div class="L" id="fontPreview" style="font-size:40px;text-align:center">MAMÁ · mamá · PATO</div>
+  </div>
+  <div class="panel">
+    <h3>Voz</h3>
+    <label>Velocidad: <b id="rateVal"></b></label>
+    <input type="range" id="setRate" min="0.5" max="1.1" step="0.05">
+    <label>Voz en español:</label>
+    <div class="seg" id="setVoice"></div>
+    <button class="big" id="testVoice" style="background:var(--b);font-size:18px">🔊 Probar voz</button>
+    <p class="hint" id="voiceInfo" style="text-align:left;margin:0"></p>
+  </div>
+  <div class="panel">
+    <h3>Progreso</h3>
+    <button class="big" id="reset" style="background:#d9534f;font-size:18px">Reiniciar estrellas y amigos</button>
+  </div>
+</section>
+
+<div id="party"></div>
+<div id="modal"><div class="box"><div class="petbig" id="mPet"></div><h2 style="margin:6px 0">¡Nuevo amigo!</h2><button class="big" id="mOk">¡Bien! 🎉</button></div></div>
+
+<script>
+const VOWELS=['A','E','I','O','U'];
+const ALL_CONS=['B','C','CH','D','F','G','H','J','K','L','LL','M','N','Ñ','P','Q','R','RR','S','T','V','W','X','Y','Z'];
+const CONTINUANT={M:'mmm',L:'lll',S:'sss',N:'nnn',F:'fff',Z:'zzz',J:'jjj'};
+const COLORS=['#FF7A59','#3DB5E6','#5DBB63','#F7B731','#A77BDB','#F06292'];
+const PETS=['🐣','🐢','🦖','🐙','🦄','🐳','🦊','🐝','🦉','🐬','🦋','🐲','🦔','🐧','🦁','🐼','🦩','🐨','🦕','🐞'];
+const PER_PET=5;
+const WORDS=[
+ {w:'MAMÁ',s:['MA','MÁ'],e:'👩'},{w:'PAPÁ',s:['PA','PÁ'],e:'👨'},{w:'PATO',s:['PA','TO'],e:'🦆'},
+ {w:'TOMATE',s:['TO','MA','TE'],e:'🍅'},{w:'MALETA',s:['MA','LE','TA'],e:'🧳'},{w:'PELOTA',s:['PE','LO','TA'],e:'⚽'},
+ {w:'PALOMA',s:['PA','LO','MA'],e:'🕊️'},{w:'PATATA',s:['PA','TA','TA'],e:'🥔'},{w:'LUPA',s:['LU','PA'],e:'🔍'},
+ {w:'MAPA',s:['MA','PA'],e:'🗺️'},{w:'MOTO',s:['MO','TO'],e:'🏍️'},{w:'LATA',s:['LA','TA'],e:'🥫'},
+ {w:'SAPO',s:['SA','PO'],e:'🐸'},{w:'SOPA',s:['SO','PA'],e:'🍲'},{w:'SETA',s:['SE','TA'],e:'🍄'},
+ {w:'LUNA',s:['LU','NA'],e:'🌙'},{w:'MONO',s:['MO','NO'],e:'🐒'},{w:'MANO',s:['MA','NO'],e:'✋'},
+ {w:'PINO',s:['PI','NO'],e:'🌲'},{w:'DADO',s:['DA','DO'],e:'🎲'},{w:'DEDO',s:['DE','DO'],e:'☝️'},
+ {w:'LIMÓN',s:['LI','MÓN'],e:'🍋'},{w:'MELÓN',s:['ME','LÓN'],e:'🍈'},{w:'SANDÍA',s:['SAN','DÍ','A'],e:'🍉'},
+ {w:'BOTA',s:['BO','TA'],e:'👢'},{w:'BEBÉ',s:['BE','BÉ'],e:'👶'},{w:'BALLENA',s:['BA','LLE','NA'],e:'🐳'},{w:'BOCA',s:['BO','CA'],e:'👄'},{w:'BÚHO',s:['BÚ','HO'],e:'🦉'},
+ {w:'CASA',s:['CA','SA'],e:'🏠'},{w:'CAMA',s:['CA','MA'],e:'🛏️'},{w:'COCO',s:['CO','CO'],e:'🥥'},{w:'CUCHARA',s:['CU','CHA','RA'],e:'🥄'},{w:'CEBOLLA',s:['CE','BO','LLA'],e:'🧅'},
+ {w:'CABALLO',s:['CA','BA','LLO'],e:'🐴'},{w:'COHETE',s:['CO','HE','TE'],e:'🚀'},{w:'CHOCOLATE',s:['CHO','CO','LA','TE'],e:'🍫'},{w:'COCHE',s:['CO','CHE'],e:'🚗'},{w:'LECHE',s:['LE','CHE'],e:'🥛'},
+ {w:'DELFÍN',s:['DEL','FÍN'],e:'🐬'},{w:'FOCA',s:['FO','CA'],e:'🦭'},{w:'FUEGO',s:['FUE','GO'],e:'🔥'},{w:'FRESA',s:['FRE','SA'],e:'🍓'},
+ {w:'GATO',s:['GA','TO'],e:'🐱'},{w:'GORILA',s:['GO','RI','LA'],e:'🦍'},{w:'GALLETA',s:['GA','LLE','TA'],e:'🍪'},{w:'GUITARRA',s:['GUI','TA','RRA'],e:'🎸'},
+ {w:'HUEVO',s:['HUE','VO'],e:'🥚'},{w:'HELADO',s:['HE','LA','DO'],e:'🍦'},{w:'HADA',s:['HA','DA'],e:'🧚'},{w:'HOJA',s:['HO','JA'],e:'🍃'},
+ {w:'JIRAFA',s:['JI','RA','FA'],e:'🦒'},{w:'KIWI',s:['KI','WI'],e:'🥝'},{w:'KOALA',s:['KO','A','LA'],e:'🐨'},
+ {w:'LORO',s:['LO','RO'],e:'🦜'},{w:'LEÓN',s:['LE','ÓN'],e:'🦁'},{w:'LLAVE',s:['LLA','VE'],e:'🔑'},{w:'LLUVIA',s:['LLU','VIA'],e:'🌧️'},
+ {w:'MANZANA',s:['MAN','ZA','NA'],e:'🍎'},{w:'MOCHILA',s:['MO','CHI','LA'],e:'🎒'},{w:'NUBE',s:['NU','BE'],e:'☁️'},{w:'NARIZ',s:['NA','RIZ'],e:'👃'},{w:'NIDO',s:['NI','DO'],e:'🪺'},
+ {w:'PIÑA',s:['PI','ÑA'],e:'🍍'},{w:'NIÑO',s:['NI','ÑO'],e:'👦'},{w:'ARAÑA',s:['A','RA','ÑA'],e:'🕷️'},
+ {w:'PERRO',s:['PE','RRO'],e:'🐶'},{w:'PEZ',s:['PEZ'],e:'🐟'},{w:'PAN',s:['PAN'],e:'🍞'},{w:'PALOMITAS',s:['PA','LO','MI','TAS'],e:'🍿'},{w:'QUESO',s:['QUE','SO'],e:'🧀'},
+ {w:'RATÓN',s:['RA','TÓN'],e:'🐭'},{w:'ROSA',s:['RO','SA'],e:'🌹'},{w:'REGALO',s:['RE','GA','LO'],e:'🎁'},{w:'RELOJ',s:['RE','LOJ'],e:'⌚'},{w:'TORRE',s:['TO','RRE'],e:'🗼'},
+ {w:'SOL',s:['SOL'],e:'☀️'},{w:'SILLA',s:['SI','LLA'],e:'🪑'},{w:'TORTUGA',s:['TOR','TU','GA'],e:'🐢'},{w:'TAZA',s:['TA','ZA'],e:'☕'},{w:'TIGRE',s:['TI','GRE'],e:'🐯'},
+ {w:'TELÉFONO',s:['TE','LÉ','FO','NO'],e:'☎️'},{w:'VACA',s:['VA','CA'],e:'🐮'},{w:'VELA',s:['VE','LA'],e:'🕯️'},{w:'UVA',s:['U','VA'],e:'🍇'},
+ {w:'TAXI',s:['TA','XI'],e:'🚕'},{w:'YOYÓ',s:['YO','YÓ'],e:'🪀'},{w:'YATE',s:['YA','TE'],e:'🛥️'},
+ {w:'ZAPATO',s:['ZA','PA','TO'],e:'👞'},{w:'ZORRO',s:['ZO','RRO'],e:'🦊'},{w:'ZANAHORIA',s:['ZA','NA','HO','RIA'],e:'🥕'}
+];
+
+/* ---------- estado ---------- */
+const DEF={cons:['M','P','L','T'],kase:'upper',font:'Andika',rate:0.8,stars:0,voiceURI:null};
+let S=Object.assign({},DEF);
+try{const raw=localStorage.getItem('lecturaCasa');if(raw)S=Object.assign({},DEF,JSON.parse(raw));}catch(e){}
+/* guardado: local + base de datos del artefacto (persistente entre sesiones y dispositivos) */
+let remote=null,writing=false,dirty=false;
+function save(){try{localStorage.setItem('lecturaCasa',JSON.stringify(S));}catch(e){}dirty=true;flush();}
+async function flush(){if(!remote||writing||!dirty)return;writing=true;dirty=false;
+  try{await remote.set(JSON.parse(JSON.stringify(S)));}
+  catch(e){if(e&&e.code==='unavailable'){dirty=true;writing=false;setTimeout(flush,1500+Math.random()*1500);return;}}
+  writing=false;if(dirty)flush();}
+async function initRemote(){try{
+  if(!window.claude||typeof claude.use!=='function')return;
+  const db=await claude.use('db');const us=await claude.use('user');if(!db||!us)return;
+  const id=await us.id();if(!id)return;
+  const ref=db.doc('data/users/'+id+'/progreso');
+  const snap=await Promise.race([ref.get(),new Promise((_,r)=>setTimeout(()=>r('timeout'),10000))]);
+  const d=snap.exists?(snap.data()||{}):null;
+  if(d){const localStars=S.stars;S=Object.assign({},DEF,S,d);if(!Array.isArray(S.cons)||!S.cons.length)S.cons=DEF.cons.slice();S.stars=Math.max(localStars,+d.stars||0);}
+  remote=ref;
+  try{localStorage.setItem('lecturaCasa',JSON.stringify(S));}catch(e){}
+  renderStars();applyLook();pickVoice();
+  if(document.getElementById('amigos').classList.contains('on'))renderPets();
+  if(!d||S.stars!==(+d.stars||0)){dirty=true;flush();}
+}catch(e){}}
+
+const $=id=>document.getElementById(id);
+const strip=t=>t.normalize('NFD').replace(/[̀-̂̄-ͯ]/g,'').normalize('NFC'); /* conserva la Ñ */
+function tokens(w){w=strip(w);const t=[];for(let i=0;i<w.length;i++){const two=w.substr(i,2);
+  if(two==='CH'||two==='LL'||two==='RR'){t.push(two);i++;continue;}
+  if(two==='QU'){t.push('Q');i++;continue;}
+  if(two==='GU'&&'EI'.includes(w[i+2]||'_')){t.push('G');i++;continue;}
+  t.push(w[i]);}return t;}
+const syl=(c,v)=>c==='Q'?('EI'.includes(v)?'QU'+v:null):c+v;
+const consOf=s=>s.slice(0,-1);
+const fmt=t=>S.kase==='lower'?t.toLowerCase():t;
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const sylPool=()=>{const o=[];S.cons.forEach(c=>VOWELS.forEach(v=>{const s=syl(c,v);if(s)o.push(s);}));return o;};
+const okLetters=()=>new Set([...VOWELS,...S.cons]);
+const availWords=()=>{const ok=okLetters();return WORDS.filter(w=>tokens(w.w).every(ch=>ok.has(ch)));};
+
+/* ---------- voz ---------- */
+let voice=null;const hasTTS='speechSynthesis' in window;
+const GOOD=/mejorad|enhanced|premium|calidad/i;
+const esVoices=()=>hasTTS?speechSynthesis.getVoices().filter(v=>/^es/i.test(v.lang)).sort((a,b)=>(GOOD.test(b.name)-GOOD.test(a.name))||((b.lang==='es-ES')-(a.lang==='es-ES'))):[];
+function pickVoice(){if(!hasTTS)return;const vs=esVoices();voice=vs.find(v=>v.voiceURI===S.voiceURI)||vs.find(v=>v.lang==='es-ES'&&GOOD.test(v.name))||vs.find(v=>v.lang==='es-ES')||vs[0]||null;
+  if(document.getElementById('padres').classList.contains('on'))renderPadres();}
+if(hasTTS){pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}
+let modalOn=false,sayT=null;
+function say(t,rate,force){if(!hasTTS)return;if(modalOn&&!force)return;
+  try{clearTimeout(sayT);const busy=speechSynthesis.speaking||speechSynthesis.pending;speechSynthesis.cancel();
+    const go=()=>{const u=new SpeechSynthesisUtterance(t.toLowerCase());u.lang='es-ES';if(voice)u.voice=voice;u.rate=rate||S.rate;speechSynthesis.speak(u);};
+    /* iOS se come la frase si se habla justo después de cancelar: pequeña pausa */
+    if(busy)sayT=setTimeout(go,150);else go();}catch(e){}}
+let warmed=false;
+document.addEventListener('pointerdown',()=>{if(warmed||!hasTTS)return;warmed=true;try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u);}catch(e){}},{once:false});
+
+/* ---------- navegación ---------- */
+let current='home';
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id));current=id;window.scrollTo(0,0);
+  if(id==='tren')initTren();if(id==='caza')initCaza();if(id==='palabra')newWord();if(id==='lee')newLee();if(id==='amigos')renderPets();if(id==='padres')renderPadres();}
+document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+document.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>{if(hasTTS)speechSynthesis.cancel();go('home');});
+
+/* ---------- estrellas y amigos ---------- */
+function renderStars(){document.querySelectorAll('[data-stars]').forEach(e=>e.textContent='⭐ '+S.stars);}
+function addStar(){S.stars++;save();renderStars();
+  if(S.stars%PER_PET===0&&S.stars/PER_PET<=PETS.length){const p=PETS[S.stars/PER_PET-1];modalOn=true;
+    setTimeout(()=>{$('mPet').textContent=p;$('modal').classList.add('on');say('¡Tienes un nuevo amigo!',0.85,true);},1200);}}
+$('mPet').onclick=()=>say('¡Tienes un nuevo amigo!',0.85,true);
+$('mOk').onclick=()=>{$('modal').classList.remove('on');modalOn=false;
+  /* retomar el juego: repetir lo que toca oír */
+  setTimeout(()=>{if(current==='caza'&&cTarget)say(cTarget);else if(current==='palabra'&&pWord)say(pWord.w,S.rate*0.9);},250);};
+function party(){const p=$('party');const em=['⭐','🎉','✨','🌟','🎈'];for(let i=0;i<14;i++){const s=document.createElement('span');s.textContent=rnd(em);s.style.left=Math.random()*95+'vw';s.style.animationDelay=(Math.random()*.4)+'s';p.appendChild(s);setTimeout(()=>s.remove(),2200);}}
+function renderPets(){const n=Math.min(Math.floor(S.stars/PER_PET),PETS.length);$('pets').innerHTML=PETS.map((p,i)=>`<div class="pet ${i<n?'':'lock'}">${i<n?p:'❔'}</div>`).join('');
+  const rest=S.stars%PER_PET;$('petBar').style.width=(n>=PETS.length?100:rest/PER_PET*100)+'%';
+  $('petHint').textContent=n>=PETS.length?'¡Los tienes todos!':`Te faltan ${PER_PET-rest} ⭐ para un nuevo amigo`;}
+
+/* ---------- TREN ---------- */
+let tC=null,tV=null,tJoins=0;
+function initTren(){tC=null;tV=null;$('wag1').textContent='?';$('wag2').textContent='?';$('train').classList.remove('joined');
+  $('consRow').innerHTML=S.cons.map(c=>`<button class="chip c L" data-c="${c}">${fmt(c==='Q'?'QU':c)}</button>`).join('');
+  $('vowRow').innerHTML=VOWELS.map(v=>`<button class="chip v L" data-v="${v}">${fmt(v)}</button>`).join('');
+  $('consRow').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{tC=b.dataset.c;$('wag1').textContent=fmt(tC==='Q'?'QU':tC);$('train').classList.remove('joined');
+    $('consRow').querySelectorAll('.chip').forEach(x=>x.classList.toggle('sel',x===b));if(CONTINUANT[tC])say(CONTINUANT[tC],0.6);});
+  $('vowRow').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{tV=b.dataset.v;$('wag2').textContent=fmt(tV);$('train').classList.remove('joined');
+    $('vowRow').querySelectorAll('.chip').forEach(x=>x.classList.toggle('sel',x===b));say(tV);});}
+$('wag1').onclick=()=>{if(tC&&CONTINUANT[tC])say(CONTINUANT[tC],0.6);};
+$('wag2').onclick=()=>{if(tV)say(tV);};
+$('join').onclick=()=>{if(!tC||!tV||!syl(tC,tV)){$('join').classList.add('shake');setTimeout(()=>$('join').classList.remove('shake'),400);return;}
+  const tr=$('train');tr.classList.remove('joined');void tr.offsetWidth;tr.classList.add('joined');say(syl(tC,tV),S.rate*0.85);
+  tJoins++;if(tJoins%3===0){addStar();party();}};
+
+/* ---------- CAZA ---------- */
+let cTarget=null,cRound=0,cBusy=false;
+function initCaza(){cRound=0;nextCaza();}
+function nextCaza(){cBusy=false;const pool=sylPool();const n=cRound<5?2:3;cTarget=rnd(pool);
+  const opts=[cTarget];
+  const sameC=shuffle(pool.filter(s=>s!==cTarget&&consOf(s)===consOf(cTarget)));
+  if(sameC.length)opts.push(sameC[0]);
+  shuffle(pool.filter(s=>!opts.includes(s))).forEach(s=>{if(opts.length<n)opts.push(s);});
+  const sh=shuffle(opts.slice(0,n));
+  $('bubbles').innerHTML=sh.map((s,i)=>`<button class="bubble L" data-s="${s}" style="background:${COLORS[(i+cRound)%COLORS.length]}">${fmt(s)}</button>`).join('');
+  $('bubbles').querySelectorAll('.bubble').forEach(b=>b.onclick=()=>{if(cBusy)return;
+    if(b.dataset.s===cTarget){cBusy=true;b.classList.add('ok');say('¡Muy bien! '+cTarget.toLowerCase(),0.9);addStar();party();cRound++;setTimeout(nextCaza,1600);}
+    else{b.classList.add('shake');setTimeout(()=>b.classList.remove('shake'),400);say(cTarget);}});
+  setTimeout(()=>{if(current==='caza')say(cTarget);},350);}
+$('cazaSay').onclick=()=>say(cTarget);
+
+/* ---------- PALABRA ---------- */
+let pWord=null,pNext=0,pLast=null,pBusy=false;
+function newWord(){pBusy=false;const ws=availWords();
+  if(!ws.length){$('pic').textContent='🙈';$('slots').innerHTML='';$('tiles').innerHTML='<p class="hint">Aún no hay palabras con estas letras. Activa más consonantes en ajustes.</p>';return;}
+  let c=ws.filter(w=>w!==pLast);if(!c.length)c=ws;pWord=rnd(c);pLast=pWord;pNext=0;
+  $('pic').textContent=pWord.e;
+  $('slots').innerHTML=pWord.s.map(()=>'<div class="slot"></div>').join('');
+  const inWord=new Set(pWord.s.map(strip));
+  const extra=shuffle(sylPool().filter(s=>!inWord.has(s))).slice(0,pWord.s.length>2?2:1);
+  const tiles=shuffle([...pWord.s,...extra]);
+  $('tiles').innerHTML=tiles.map((s,i)=>`<button class="tile L" data-s="${s}" style="background:${COLORS[i%COLORS.length]}">${fmt(s)}</button>`).join('');
+  $('tiles').querySelectorAll('.tile').forEach(b=>b.onclick=()=>tapTile(b));
+  setTimeout(()=>{if(current==='palabra')say(pWord.w,S.rate*0.9);},350);}
+function tapTile(b){if(pBusy)return;const need=pWord.s[pNext];
+  if(strip(b.dataset.s)===strip(need)){b.classList.add('used');const sl=$('slots').children[pNext];sl.textContent=fmt(need);sl.classList.add('full');pNext++;
+    if(pNext===pWord.s.length){pBusy=true;setTimeout(()=>say(pWord.w,S.rate*0.9),150);addStar();party();setTimeout(newWord,2300);}
+    else say(need);}
+  else{b.classList.add('shake');setTimeout(()=>b.classList.remove('shake'),400);say(need);}}
+$('pic').onclick=()=>pWord&&say(pWord.w,S.rate*0.9);
+
+/* ---------- LEE Y ELIGE ---------- */
+let lWord=null,lLast=null,lFails=0,lBusy=false;
+function newLee(){lBusy=false;lFails=0;const ws=availWords();
+  /* una opción por dibujo distinto */
+  if(ws.length<2){$('leeWord').textContent='🙈';$('leeOpts').innerHTML='<p class="hint">Faltan palabras. Activa más consonantes en ajustes.</p>';return;}
+  let c=ws.filter(w=>w!==lLast);if(!c.length)c=ws;lWord=rnd(c);lLast=lWord;
+  const others=shuffle(ws.filter(w=>w!==lWord&&w.e!==lWord.e)).slice(0,ws.length>=3?2:1);
+  const opts=shuffle([lWord,...others]);
+  $('leeWord').textContent=fmt(lWord.w);
+  $('leeOpts').innerHTML=opts.map(w=>`<button class="bubble" data-w="${w.w}" style="background:#fff;font-size:64px">${w.e}</button>`).join('');
+  $('leeOpts').querySelectorAll('.bubble').forEach(b=>b.onclick=()=>{if(lBusy)return;
+    if(b.dataset.w===lWord.w){lBusy=true;b.classList.add('ok');say('¡Muy bien! '+lWord.w,0.9);addStar();party();setTimeout(newLee,1900);}
+    else{b.classList.add('shake');setTimeout(()=>b.classList.remove('shake'),400);lFails++;
+      /* tras dos fallos, ayuda: se leen las sílabas despacio */
+      if(lFails>=2)say(lWord.s.join(', '),S.rate*0.75);}});}
+
+/* ---------- PADRES ---------- */
+let pressT=null;const gear=$('gear');
+gear.addEventListener('pointerdown',()=>{gear.style.transform='scale(.9)';pressT=setTimeout(()=>{gear.style.transform='';go('padres');},1500);});
+['pointerup','pointerleave','pointercancel'].forEach(ev=>gear.addEventListener(ev,()=>{clearTimeout(pressT);gear.style.transform='';}));
+gear.addEventListener('contextmenu',e=>e.preventDefault());
+let resetArmed=false;
+function applyLook(){document.documentElement.style.setProperty('--letter',S.font==='system-ui'?'system-ui,sans-serif':`'${S.font}',sans-serif`);}
+function renderPadres(){resetArmed=false;$('reset').textContent='Reiniciar estrellas y amigos';
+  $('setCons').innerHTML=ALL_CONS.map(c=>`<button data-c="${c}" class="${S.cons.includes(c)?'sel':''}">${c} ${c.toLowerCase()}</button>`).join('');
+  $('setCons').querySelectorAll('button').forEach(b=>b.onclick=()=>{const c=b.dataset.c;
+    if(S.cons.includes(c)){if(S.cons.length===1)return;S.cons=S.cons.filter(x=>x!==c);}else S.cons=ALL_CONS.filter(x=>S.cons.includes(x)||x===c);save();renderPadres();});
+  $('setCase').querySelectorAll('button').forEach(b=>{b.classList.toggle('sel',b.dataset.v===S.kase);b.onclick=()=>{S.kase=b.dataset.v;save();renderPadres();};});
+  $('setFont').querySelectorAll('button').forEach(b=>{b.classList.toggle('sel',b.dataset.v===S.font);b.onclick=()=>{S.font=b.dataset.v;save();applyLook();renderPadres();};});
+  $('setRate').value=S.rate;$('rateVal').textContent=S.rate.toFixed(2);
+  const vs=esVoices();
+  $('setVoice').innerHTML=vs.length?vs.map((v,i)=>`<button data-i="${i}" class="${voice&&v.voiceURI===voice.voiceURI?'sel':''}">${v.name} (${v.lang})</button>`).join(''):'<span class="hint">No hay voces en español en este móvil.</span>';
+  $('setVoice').querySelectorAll('button').forEach(b=>b.onclick=()=>{const v=vs[+b.dataset.i];voice=v;S.voiceURI=v.voiceURI;save();renderPadres();say('Hola, ¡vamos a leer! ma, pa, mamá');});
+  const n=availWords().length;
+  $('voiceInfo').textContent=(!hasTTS?'Este navegador no tiene voz sintética.':voice?`Voz: ${voice.name} (${voice.lang}).`:'No se encontró voz en español; se usará la predeterminada.')+` Palabras disponibles con estas letras: ${n}.`;}
+$('setRate').oninput=e=>{S.rate=+e.target.value;$('rateVal').textContent=S.rate.toFixed(2);save();};
+$('testVoice').onclick=()=>say('ma, me, mi, mo, mu. ¡Mamá!');
+$('reset').onclick=()=>{if(!resetArmed){resetArmed=true;$('reset').textContent='¿Seguro? Pulsa otra vez';return;}S.stars=0;save();renderStars();renderPadres();};
+
+applyLook();renderStars();initRemote();
+</script>
+</body>
+</html>
