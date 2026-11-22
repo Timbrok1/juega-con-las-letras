@@ -26,9 +26,9 @@ button{font-family:inherit;color:inherit;cursor:pointer}
 .screen.on{display:flex}
 .L{font-family:var(--letter);font-weight:700}
 header{display:flex;align-items:center;justify-content:space-between;gap:8px}
-header h2{margin:0;font-size:20px;text-align:center;flex:1}
+header h2{margin:0;font-size:18px;text-align:center;flex:1;line-height:1.15}
 .icon-btn{width:54px;height:54px;border-radius:18px;border:none;background:#fff;font-size:26px;box-shadow:0 4px 0 rgba(0,0,0,.08);flex:none}
-.stars{font-size:20px;font-weight:800;background:#fff;padding:12px 14px;border-radius:18px;box-shadow:0 4px 0 rgba(0,0,0,.08);white-space:nowrap}
+.stars{font-size:18px;font-weight:800;background:#fff;padding:12px 10px;border-radius:18px;box-shadow:0 4px 0 rgba(0,0,0,.08);white-space:nowrap}
 h1{font-size:28px;margin:4px 0 0;text-align:center}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .game-btn{border:none;border-radius:26px;padding:16px 8px;color:#fff;font-size:19px;font-weight:800;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 6px 0 rgba(0,0,0,.15);min-height:150px;justify-content:center;line-height:1.15}
@@ -113,7 +113,7 @@ input[type=range]{width:100%}
 
 <!-- TREN -->
 <section class="screen" id="tren">
-  <header><button class="icon-btn" data-back>⬅️</button><h2>Tren de sílabas</h2><div class="stars" data-stars></div></header>
+  <header><button class="icon-btn" data-back>⬅️</button><h2>Tren de sílabas</h2><button class="icon-btn help" data-help aria-label="Instrucciones">❓</button><div class="stars" data-stars></div></header>
   <div class="center">
     <div class="train" id="train">
       <div class="loco">🚂</div>
@@ -128,7 +128,7 @@ input[type=range]{width:100%}
 
 <!-- CAZA -->
 <section class="screen" id="caza">
-  <header><button class="icon-btn" data-back>⬅️</button><h2>Caza la sílaba</h2><div class="stars" data-stars></div></header>
+  <header><button class="icon-btn" data-back>⬅️</button><h2>Caza la sílaba</h2><button class="icon-btn help" data-help aria-label="Instrucciones">❓</button><div class="stars" data-stars></div></header>
   <div class="center">
     <button class="speaker" id="cazaSay">🔊</button>
     <div class="bubbles" id="bubbles"></div>
@@ -137,7 +137,7 @@ input[type=range]{width:100%}
 
 <!-- PALABRA -->
 <section class="screen" id="palabra">
-  <header><button class="icon-btn" data-back>⬅️</button><h2>Construye la palabra</h2><div class="stars" data-stars></div></header>
+  <header><button class="icon-btn" data-back>⬅️</button><h2>Construye la palabra</h2><button class="icon-btn help" data-help aria-label="Instrucciones">❓</button><div class="stars" data-stars></div></header>
   <div class="center" id="palWrap">
     <button class="pic" id="pic"></button>
     <div class="slots L" id="slots"></div>
@@ -147,7 +147,7 @@ input[type=range]{width:100%}
 
 <!-- LEE -->
 <section class="screen" id="lee">
-  <header><button class="icon-btn" data-back>⬅️</button><h2>Lee y elige</h2><div class="stars" data-stars></div></header>
+  <header><button class="icon-btn" data-back>⬅️</button><h2>Lee y elige</h2><button class="icon-btn help" data-help aria-label="Instrucciones">❓</button><div class="stars" data-stars></div></header>
   <div class="center">
     <div class="pic L" id="leeWord" style="font-size:64px;letter-spacing:2px;padding:18px 30px"></div>
     <p class="hint" style="margin:0">¿Qué dibujo es?</p>
@@ -157,7 +157,7 @@ input[type=range]{width:100%}
 
 <!-- AMIGOS -->
 <section class="screen" id="amigos">
-  <header><button class="icon-btn" data-back>⬅️</button><h2>Mis amigos</h2><div class="stars" data-stars></div></header>
+  <header><button class="icon-btn" data-back>⬅️</button><h2>Mis amigos</h2><button class="icon-btn help" data-help aria-label="Instrucciones">❓</button><div class="stars" data-stars></div></header>
   <div class="bar"><div id="petBar"></div></div>
   <p class="hint" id="petHint" style="opacity:.8;font-size:16px;margin:0"></p>
   <div class="pets" id="pets"></div>
@@ -170,6 +170,14 @@ input[type=range]{width:100%}
     <h3>Consonantes que ya conoce</h3>
     <div class="seg L" id="setCons"></div>
     <p class="hint" style="text-align:left;margin:0">Las vocales están siempre activas. Marca solo las letras dadas en clase.</p>
+    <h3 style="margin-top:6px">Activar hasta la letra…</h3>
+    <div class="seg L" id="setUpTo"></div>
+    <p class="hint" style="text-align:left;margin:0">Activa de golpe todas las letras hasta la que toques, en el orden habitual de las cartillas (se puede cambiar en <code>data.js</code>). La última letra activada se practica más.</p>
+  </div>
+  <div class="panel">
+    <h3>Tipos de sílaba en las palabras</h3>
+    <div class="seg" id="setTypes"></div>
+    <p class="hint" id="typesInfo" style="text-align:left;margin:0"></p>
   </div>
   <div class="panel">
     <h3>Tipo de letra</h3>
@@ -193,7 +201,9 @@ input[type=range]{width:100%}
   </div>
   <div class="panel">
     <h3>Progreso</h3>
+    <p class="hint" id="hardInfo" style="text-align:left;margin:0;opacity:.85;font-size:15px"></p>
     <button class="big" id="reset" style="background:#d9534f;font-size:18px">Reiniciar estrellas y amigos</button>
+    <button class="big" id="resetStats" style="background:#999;font-size:16px">Borrar historial de aciertos y fallos</button>
   </div>
 </section>
 
@@ -203,15 +213,18 @@ input[type=range]{width:100%}
 <script src="data.js"></script>
 <script>
 /* letras, palabras y frases: en data.js (lo comparte el generador de audios) */
-const {VOWELS,ALL_CONS,CONTINUANT,WORDS,PHRASES}=window.DATA;
+const {VOWELS,ALL_CONS,CONTINUANT,WORDS,PHRASES,ORDER}=window.DATA;
 const COLORS=['#FF7A59','#3DB5E6','#5DBB63','#F7B731','#A77BDB','#F06292'];
 const PETS=['🐣','🐢','🦖','🐙','🦄','🐳','🦊','🐝','🦉','🐬','🦋','🐲','🦔','🐧','🦁','🐼','🦩','🐨','🦕','🐞'];
 const PER_PET=5;
 
 /* ---------- estado ---------- */
-const DEF={cons:['M','P','L','T'],kase:'upper',font:'Andika',rate:0.8,stars:0,voiceURI:null,resetAt:0};
+/* sylTypes: tipos de sílaba permitidos además de las directas; stats: historial de aciertos/fallos; newest: última letra activada */
+const DEF={cons:['M','P','L','T'],kase:'upper',font:'Andika',rate:0.8,stars:0,voiceURI:null,resetAt:0,sylTypes:[],stats:{},newest:null};
 let S=Object.assign({},DEF);
 try{const raw=localStorage.getItem('lecturaCasa');if(raw)S=Object.assign({},DEF,JSON.parse(raw));}catch(e){}
+function fixState(){if(!S.stats||typeof S.stats!=='object')S.stats={};if(!Array.isArray(S.sylTypes))S.sylTypes=[];}
+fixState();
 /* guardado: local + base de datos del artefacto (persistente entre sesiones y dispositivos) */
 let remote=null,writing=false,dirty=false;
 function save(){try{localStorage.setItem('lecturaCasa',JSON.stringify(S));}catch(e){}dirty=true;flush();}
@@ -228,7 +241,7 @@ async function initRemote(){try{
   const d=snap.exists?(snap.data()||{}):null;
   if(d){const loc=S,rAt=+d.resetAt||0,lAt=+loc.resetAt||0,rStars=+d.stars||0;S=Object.assign({},DEF,loc,d);if(!Array.isArray(S.cons)||!S.cons.length)S.cons=DEF.cons.slice();
     /* si un lado se reinició después que el otro, gana ese lado; si no, el mayor */
-    S.stars=rAt>lAt?rStars:lAt>rAt?loc.stars:Math.max(loc.stars,rStars);S.resetAt=Math.max(rAt,lAt);}
+    S.stars=rAt>lAt?rStars:lAt>rAt?loc.stars:Math.max(loc.stars,rStars);S.resetAt=Math.max(rAt,lAt);fixState();}
   remote=ref;
   try{localStorage.setItem('lecturaCasa',JSON.stringify(S));}catch(e){}
   renderStars();applyLook();pickVoice();
@@ -253,7 +266,24 @@ const rnd=a=>a[Math.floor(Math.random()*a.length)];
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
 const sylPool=()=>{const o=[];S.cons.forEach(c=>VOWELS.forEach(v=>{const s=syl(c,v);if(s)o.push(s);}));return o;};
 const okLetters=()=>new Set([...VOWELS,...S.cons]);
-const availWords=()=>{const ok=okLetters();return WORDS.filter(w=>tokens(w.w).every(ch=>ok.has(ch)));};
+/* tipo de sílaba: directa (MA, QUE, LLU, A), cerrada (SOL, PAN, ÓN), trabada (FRE, GRE) o diptongo (FUE, HUE, VIA) */
+function sylType(s){const t=tokens(s),isV=x=>VOWELS.includes(x);let i=0;while(i<t.length&&!isV(t[i]))i++;const lead=i;let nv=0;while(i<t.length&&isV(t[i])){nv++;i++;}
+  return lead>=2?'trabada':nv>=2?'diptongo':i<t.length?'cerrada':'directa';}
+const TYPES={cerrada:'Con letra al final (SOL, PAN)',trabada:'Trabadas (FRESA, TIGRE)',diptongo:'Dos vocales juntas (FUEGO, LLUVIA)'};
+const wTypes=new Map();
+const wordTypes=w=>{if(!wTypes.has(w.w))wTypes.set(w.w,[...new Set(w.s.map(sylType))].filter(t=>t!=='directa'));return wTypes.get(w.w);};
+/* una palabra sale si todas sus letras están activas y todos sus tipos de sílaba están permitidos */
+const availWords=()=>{const ok=okLetters(),ty=new Set(S.sylTypes);return WORDS.filter(w=>tokens(w.w).every(ch=>ok.has(ch))&&wordTypes(w).every(t=>ty.has(t)));};
+
+/* ---------- repaso adaptativo ----------
+   S.stats[clave]={e,n}: e es una media de fallos que se va olvidando (cada ronda pesa
+   el 30 %), n las veces jugadas. Claves: 's:MA' (Caza), 'w:PATO' (Construye), 'l:PATO' (Lee). */
+function rec(k,ok){const st=S.stats[k]||{e:0,n:0};st.e=Math.round((st.e*0.7+(ok?0:1))*1000)/1000;st.n++;S.stats[k]=st;save();}
+/* peso para elegir: lo que falla sale hasta 6 veces más; lo nunca visto, algo más; la letra nueva, el doble */
+function weight(k,text){const st=S.stats[k];let w=st?Math.min(6,1+3*st.e):1.5;
+  if(S.newest&&S.cons.includes(S.newest)&&tokens(text).includes(S.newest))w*=2;return w;}
+function pickW(items,wf){const ws=items.map(wf);let r=Math.random()*ws.reduce((a,b)=>a+b,0);
+  for(let i=0;i<items.length;i++){r-=ws[i];if(r<=0)return items[i];}return items[items.length-1];}
 
 /* ---------- voz ---------- */
 let voice=null;const hasTTS='speechSynthesis' in window;
@@ -307,10 +337,19 @@ document.addEventListener('pointerdown',()=>{if(warmed)return;warmed=true;
 
 /* ---------- navegación ---------- */
 let current='home';
-function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id));current=id;window.scrollTo(0,0);
-  if(id==='tren')initTren();if(id==='caza')initCaza();if(id==='palabra')newWord();if(id==='lee')newLee();if(id==='amigos')renderPets();if(id==='padres')renderPadres();}
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id));current=id;enterT=Date.now();window.scrollTo(0,0);
+  if(id==='tren')initTren();if(id==='caza')initCaza();if(id==='palabra')newWord();if(id==='lee')newLee();if(id==='amigos'){renderPets();setTimeout(()=>{if(current==='amigos'&&!tappedSince())speakIntro('amigos',[]);},350);}if(id==='padres')renderPadres();}
 document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
-document.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>{if(hasTTS)speechSynthesis.cancel();go('home');});
+document.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>{stopVoice();go('home');});
+/* instrucciones habladas: la primera vez que entra en cada juego (en esta visita) y al pulsar ❓ */
+const INSTR={tren:PHRASES.instrTren,caza:PHRASES.instrCaza,palabra:PHRASES.instrPalabra,lee:PHRASES.instrLee,amigos:PHRASES.instrAmigos};
+const introSeen=new Set();
+/* si toca algo antes de que empiece la instrucción, no se le corta lo que ha pedido */
+let enterT=0,lastTap=0;document.addEventListener('pointerdown',()=>{lastTap=Date.now();},{capture:true});
+const tappedSince=()=>lastTap>enterT;
+function speakIntro(id,parts,rate){const list=introSeen.has(id)?parts:[INSTR[id],...parts];introSeen.add(id);if(list.length)sayAll(list,rate,false,450);}
+document.querySelectorAll('[data-help]').forEach(b=>b.onclick=()=>{const id=current;
+  const extra=id==='caza'&&cTarget?[cTarget]:id==='palabra'&&pWord?[pWord.w]:[];sayAll([INSTR[id],...extra],null,false,450);});
 
 /* ---------- estrellas y amigos ---------- */
 function renderStars(){document.querySelectorAll('[data-stars]').forEach(e=>e.textContent='⭐ '+S.stars);}
@@ -339,7 +378,8 @@ function initTren(){tC=null;tV=null;$('wag1').textContent='?';$('wag2').textCont
     if(tV&&!syl(tC,tV)){tV=null;$('wag2').textContent='?';$('vowRow').querySelectorAll('.chip').forEach(x=>x.classList.remove('sel'));}
     refreshVows();if(CONTINUANT[tC])say(CONTINUANT[tC],0.6);});
   $('vowRow').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{tV=b.dataset.v;$('wag2').textContent=fmt(tV);$('train').classList.remove('joined');
-    $('vowRow').querySelectorAll('.chip').forEach(x=>x.classList.toggle('sel',x===b));say(tV);});}
+    $('vowRow').querySelectorAll('.chip').forEach(x=>x.classList.toggle('sel',x===b));say(tV);});
+  setTimeout(()=>{if(current==='tren'&&!tappedSince())speakIntro('tren',[]);},350);}
 $('wag1').onclick=()=>{if(tC&&CONTINUANT[tC])say(CONTINUANT[tC],0.6);};
 $('wag2').onclick=()=>{if(tV)say(tV);};
 $('join').onclick=()=>{if(!tC||!tV||!syl(tC,tV)){$('join').classList.add('shake');setTimeout(()=>$('join').classList.remove('shake'),400);return;}
@@ -347,10 +387,11 @@ $('join').onclick=()=>{if(!tC||!tV||!syl(tC,tV)){$('join').classList.add('shake'
   if(!tSeen.has(s)){tSeen.add(s);if(tSeen.size%3===0){addStar();party();}}};
 
 /* ---------- CAZA ---------- */
-let cTarget=null,cLast=null,cRound=0,cBusy=false,cMiss=0;
+/* cStreak: aciertos a la primera seguidos. 2 opciones; 3 tras 3 aciertos; 4 tras 6. Un fallo baja un nivel. */
+let cTarget=null,cLast=null,cRound=0,cBusy=false,cMiss=0,cStreak=0;
 function initCaza(){cRound=0;nextCaza();}
-function nextCaza(){cBusy=false;cMiss=0;const pool=sylPool();const n=cRound<5?2:3;
-  let cand=pool.filter(s=>s!==cLast);if(!cand.length)cand=pool;cTarget=rnd(cand);cLast=cTarget;
+function nextCaza(){cBusy=false;cMiss=0;const pool=sylPool();const n=cStreak>=6?4:cStreak>=3?3:2;
+  let cand=pool.filter(s=>s!==cLast);if(!cand.length)cand=pool;cTarget=pickW(cand,s=>weight('s:'+s,s));cLast=cTarget;
   /* nunca dos opciones que suenen igual */
   const opts=[cTarget],heard=new Set([sound(cTarget)]);
   const add=s=>{if(opts.length<n&&!heard.has(sound(s))){heard.add(sound(s));opts.push(s);}};
@@ -362,51 +403,55 @@ function nextCaza(){cBusy=false;cMiss=0;const pool=sylPool();const n=cRound<5?2:
   $('bubbles').querySelectorAll('.bubble').forEach(b=>b.onclick=()=>{if(cBusy)return;
     if(b.dataset.s===cTarget){cBusy=true;b.classList.add('ok');sayAll([PHRASES.muyBien,cTarget],0.9);
       /* la estrella solo si acierta a la primera */
-      if(!cMiss){addStar();party();}cRound++;setTimeout(nextCaza,1600);}
-    else{cMiss++;b.classList.add('shake');setTimeout(()=>b.classList.remove('shake'),400);say(cTarget);}});
-  setTimeout(()=>{if(current==='caza')say(cTarget);},350);}
+      rec('s:'+cTarget,!cMiss);if(!cMiss){cStreak++;addStar();party();}cRound++;setTimeout(nextCaza,1600);}
+    else{if(!cMiss)cStreak=Math.max(0,cStreak-3);cMiss++;b.classList.add('shake');setTimeout(()=>b.classList.remove('shake'),400);say(cTarget);}});
+  setTimeout(()=>{if(current==='caza')speakIntro('caza',[cTarget]);},350);}
 $('cazaSay').onclick=()=>say(cTarget);
 
 /* ---------- PALABRA ---------- */
-let pWord=null,pNext=0,pLast=null,pBusy=false,pMiss=0;
+/* pStreak: palabras seguidas sin fallos; a partir de 3, una sílaba distractora más */
+let pWord=null,pNext=0,pLast=null,pBusy=false,pMiss=0,pStreak=0;
 function newWord(){pBusy=false;pMiss=0;const ws=availWords();
   if(!ws.length){$('pic').textContent='🙈';$('slots').innerHTML='';$('tiles').innerHTML='<p class="hint">Aún no hay palabras con estas letras. Activa más consonantes en ajustes.</p>';return;}
-  let c=ws.filter(w=>w!==pLast);if(!c.length)c=ws;pWord=rnd(c);pLast=pWord;pNext=0;
+  let c=ws.filter(w=>w!==pLast);if(!c.length)c=ws;pWord=pickW(c,w=>weight('w:'+w.w,w.w));pLast=pWord;pNext=0;
   $('pic').textContent=pWord.e;
   $('slots').innerHTML=pWord.s.map(()=>'<div class="slot"></div>').join('');
   /* distractoras que no suenen como ninguna sílaba de la palabra ni entre sí */
-  const heard=new Set(pWord.s.map(sound)),k=pWord.s.length>2?2:1,extra=[];
+  const heard=new Set(pWord.s.map(sound)),k=(pWord.s.length>2?2:1)+(pStreak>=3?1:0),extra=[];
   shuffle(sylPool()).forEach(s=>{if(extra.length<k&&!heard.has(sound(s))){heard.add(sound(s));extra.push(s);}});
   const tiles=shuffle([...pWord.s,...extra]);
   $('tiles').innerHTML=tiles.map((s,i)=>`<button class="tile L" data-s="${s}" style="background:${COLORS[i%COLORS.length]}">${fmt(s)}</button>`).join('');
   $('tiles').querySelectorAll('.tile').forEach(b=>b.onclick=()=>tapTile(b));
-  setTimeout(()=>{if(current==='palabra')say(pWord.w,S.rate*0.9);},350);}
+  setTimeout(()=>{if(current==='palabra')speakIntro('palabra',[pWord.w],S.rate*0.9);},350);}
 function tapTile(b){if(pBusy)return;const need=pWord.s[pNext];
   if(strip(b.dataset.s)===strip(need)){b.classList.add('used');const sl=$('slots').children[pNext];sl.textContent=fmt(need);sl.classList.add('full');pNext++;
     if(pNext===pWord.s.length){pBusy=true;const w=pWord.w;
       /* force: la palabra suena aunque se vaya a mostrar un amigo nuevo */
       setTimeout(()=>say(w,S.rate*0.9,true),150);
       /* estrella si la completa con 1 fallo como mucho */
+      rec('w:'+w,pMiss===0);pStreak=pMiss===0?pStreak+1:0;
       if(pMiss<=1){addStar();party();}setTimeout(newWord,2300);}
     else say(need);}
   else{pMiss++;b.classList.add('shake');setTimeout(()=>b.classList.remove('shake'),400);say(need);}}
 $('pic').onclick=()=>pWord&&say(pWord.w,S.rate*0.9);
 
 /* ---------- LEE Y ELIGE ---------- */
-let lWord=null,lLast=null,lFails=0,lBusy=false;
+/* lStreak: aciertos a la primera seguidos; a partir de 4, un dibujo más para elegir */
+let lWord=null,lLast=null,lFails=0,lBusy=false,lStreak=0;
 function newLee(){lBusy=false;lFails=0;const ws=availWords();
   /* una opción por dibujo distinto */
   if(ws.length<2){$('leeWord').textContent='🙈';$('leeOpts').innerHTML='<p class="hint">Faltan palabras. Activa más consonantes en ajustes.</p>';return;}
-  let c=ws.filter(w=>w!==lLast);if(!c.length)c=ws;lWord=rnd(c);lLast=lWord;
-  const others=shuffle(ws.filter(w=>w!==lWord&&w.e!==lWord.e)).slice(0,ws.length>=3?2:1);
+  let c=ws.filter(w=>w!==lLast);if(!c.length)c=ws;lWord=pickW(c,w=>weight('l:'+w.w,w.w));lLast=lWord;
+  const others=shuffle(ws.filter(w=>w!==lWord&&w.e!==lWord.e)).slice(0,lStreak>=4?3:2);
   const opts=shuffle([lWord,...others]);
   $('leeWord').textContent=fmt(lWord.w);
   $('leeOpts').innerHTML=opts.map(w=>`<button class="bubble" data-w="${w.w}" style="background:#fff;font-size:64px">${w.e}</button>`).join('');
   $('leeOpts').querySelectorAll('.bubble').forEach(b=>b.onclick=()=>{if(lBusy)return;
-    if(b.dataset.w===lWord.w){lBusy=true;b.classList.add('ok');sayAll([PHRASES.muyBien,lWord.w],0.9);if(!lFails){addStar();party();}setTimeout(newLee,1900);}
+    if(b.dataset.w===lWord.w){lBusy=true;b.classList.add('ok');sayAll([PHRASES.muyBien,lWord.w],0.9);rec('l:'+lWord.w,!lFails);lStreak=lFails?0:lStreak+1;if(!lFails){addStar();party();}setTimeout(newLee,1900);}
     else{b.classList.add('shake');setTimeout(()=>b.classList.remove('shake'),400);lFails++;
       /* tras dos fallos, ayuda: se leen las sílabas despacio */
-      if(lFails>=2)sayAll(lWord.s,S.rate*0.75,false,350);}});}
+      if(lFails>=2)sayAll(lWord.s,S.rate*0.75,false,350);}});
+  setTimeout(()=>{if(current==='lee'&&!tappedSince())speakIntro('lee',[]);},350);}
 
 /* ---------- PADRES ---------- */
 let pressT=null;const gear=$('gear');
@@ -418,7 +463,16 @@ function applyLook(){document.documentElement.style.setProperty('--letter',S.fon
 function renderPadres(){resetArmed=false;$('reset').textContent='Reiniciar estrellas y amigos';
   $('setCons').innerHTML=ALL_CONS.map(c=>`<button data-c="${c}" class="${S.cons.includes(c)?'sel':''}">${c} ${c.toLowerCase()}</button>`).join('');
   $('setCons').querySelectorAll('button').forEach(b=>b.onclick=()=>{const c=b.dataset.c;
-    if(S.cons.includes(c)){if(S.cons.length===1)return;S.cons=S.cons.filter(x=>x!==c);}else S.cons=ALL_CONS.filter(x=>S.cons.includes(x)||x===c);save();renderPadres();prefetchAudios();});
+    if(S.cons.includes(c)){if(S.cons.length===1)return;S.cons=S.cons.filter(x=>x!==c);if(S.newest===c)S.newest=null;}
+    else{S.cons=ALL_CONS.filter(x=>S.cons.includes(x)||x===c);S.newest=c;}save();renderPadres();prefetchAudios();});
+  $('setUpTo').innerHTML=ORDER.map(c=>`<button data-c="${c}" class="${S.newest===c?'sel':''}">${c}</button>`).join('');
+  $('setUpTo').querySelectorAll('button').forEach(b=>b.onclick=()=>{const i=ORDER.indexOf(b.dataset.c);
+    S.cons=ALL_CONS.filter(x=>ORDER.indexOf(x)<=i);S.newest=b.dataset.c;save();renderPadres();prefetchAudios();});
+  $('setTypes').innerHTML=Object.entries(TYPES).map(([k,l])=>`<button data-t="${k}" class="${S.sylTypes.includes(k)?'sel':''}">${l}</button>`).join('');
+  $('setTypes').querySelectorAll('button').forEach(b=>b.onclick=()=>{const t=b.dataset.t;
+    S.sylTypes=S.sylTypes.includes(t)?S.sylTypes.filter(x=>x!==t):[...S.sylTypes,t];save();renderPadres();prefetchAudios();});
+  $('typesInfo').textContent=`Las sílabas directas (MA, PE, LO) siempre están. Palabras disponibles ahora: ${availWords().length}.`;
+  renderHard();
   $('setCase').querySelectorAll('button').forEach(b=>{b.classList.toggle('sel',b.dataset.v===S.kase);b.onclick=()=>{S.kase=b.dataset.v;save();renderPadres();};});
   $('setFont').querySelectorAll('button').forEach(b=>{b.classList.toggle('sel',b.dataset.v===S.font);b.onclick=()=>{S.font=b.dataset.v;save();applyLook();renderPadres();};});
   $('setRate').value=S.rate;$('rateVal').textContent=S.rate.toFixed(2);
@@ -433,6 +487,14 @@ function renderPadres(){resetArmed=false;$('reset').textContent='Reiniciar estre
   $('voiceInfo').textContent=audioTxt+' '+(!hasTTS?'Este navegador no tiene voz sintética.':voice?`Voz del sistema: ${voice.name} (${voice.lang}).`:'No se encontró voz del sistema en español.')+` Palabras disponibles con estas letras: ${n}.`;}
 $('setRate').oninput=e=>{S.rate=+e.target.value;$('rateVal').textContent=S.rate.toFixed(2);save();};
 $('testVoice').onclick=()=>sayAll(['MA','ME','MI','MO','MU','MAMÁ'],null,false,250);
+/* lo que más le cuesta: fallos recientes repetidos, según el historial */
+const SKILL={s:'oír',w:'construir',l:'leer'};
+function renderHard(){statsArmed=false;$('resetStats').textContent='Borrar historial de aciertos y fallos';
+  const hard=Object.entries(S.stats).filter(([k,v])=>v.n>=2&&v.e>=0.5).sort((a,b)=>b[1].e-a[1].e).slice(0,8);
+  $('hardInfo').textContent=hard.length?'Lo que más le cuesta ahora: '+hard.map(([k])=>`${k.slice(2)} (${SKILL[k[0]]})`).join(', ')+'. Los juegos lo repiten más a menudo.'
+    :`Aún no hay fallos repetidos. Rondas jugadas: ${Object.values(S.stats).reduce((a,v)=>a+v.n,0)}.`;}
+let statsArmed=false;
+$('resetStats').onclick=()=>{if(!statsArmed){statsArmed=true;$('resetStats').textContent='¿Seguro? Pulsa otra vez';return;}S.stats={};save();renderHard();};
 $('reset').onclick=()=>{if(!resetArmed){resetArmed=true;$('reset').textContent='¿Seguro? Pulsa otra vez';return;}S.stars=0;S.resetAt=Date.now();save();renderStars();renderPadres();};
 
 /* ---------- app instalable y sin conexión ---------- */

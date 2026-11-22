@@ -1,12 +1,23 @@
 /* Datos del juego, compartidos por index.html y por tools/generar_audios.py.
    Lo que va detrás de «window.DATA=» debe ser JSON válido (comillas dobles,
    sin comas finales ni comentarios) para que Python lo pueda leer.
-   Al añadir palabras o frases, ejecuta el generador para crear sus audios. */
+   Al añadir palabras o frases, ejecuta el generador para crear sus audios.
+   ORDER: orden en que se enseñan las consonantes (lo usa «Activar hasta…» del panel
+   de padres). Es un orden habitual en cartillas; cámbialo si el cole sigue otro. */
 window.DATA={
  "VOWELS": ["A", "E", "I", "O", "U"],
  "ALL_CONS": ["B", "C", "CH", "D", "F", "G", "H", "J", "K", "L", "LL", "M", "N", "Ñ", "P", "Q", "R", "RR", "S", "T", "V", "W", "X", "Y", "Z"],
  "CONTINUANT": {"M": "mmm", "L": "lll", "S": "sss", "N": "nnn", "F": "fff", "Z": "zzz", "J": "jjj"},
- "PHRASES": {"muyBien": "¡Muy bien!", "nuevoAmigo": "¡Tienes un nuevo amigo!"},
+ "ORDER": ["M", "P", "L", "S", "T", "D", "N", "F", "R", "B", "V", "C", "G", "J", "Ñ", "LL", "Y", "CH", "Z", "H", "Q", "K", "RR", "X", "W"],
+ "PHRASES": {
+  "muyBien": "¡Muy bien!",
+  "nuevoAmigo": "¡Tienes un nuevo amigo!",
+  "instrTren": "Elige una letra y una vocal. Luego, pulsa juntar.",
+  "instrCaza": "Escucha, y toca la sílaba que oyes.",
+  "instrPalabra": "Escucha la palabra, y toca sus sílabas en orden.",
+  "instrLee": "Lee la palabra, y toca su dibujo.",
+  "instrAmigos": "Juega y gana estrellas. Con cinco estrellas, ¡tienes un nuevo amigo!"
+ },
  "WORDS": [
   {"w": "MAMÁ", "s": ["MA", "MÁ"], "e": "👩"},
   {"w": "PAPÁ", "s": ["PA", "PÁ"], "e": "👨"},

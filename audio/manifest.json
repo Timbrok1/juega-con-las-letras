@@ -49,6 +49,9 @@
   "do",
   "du",
   "e",
+  "elige-una-letra-y-una-vocal-luego-pulsa-juntar",
+  "escucha-la-palabra-y-toca-sus-si_labas-en-orden",
+  "escucha-y-toca-la-si_laba-que-oyes",
   "fa",
   "fe",
   "fff",
@@ -90,6 +93,7 @@
   "jjj",
   "jo",
   "ju",
+  "juega-y-gana-estrellas-con-cinco-estrellas-tienes-un-nuevo-amigo",
   "ka",
   "ke",
   "ki",
@@ -102,6 +106,7 @@
   "le",
   "le_",
   "leche",
+  "lee-la-palabra-y-toca-su-dibujo",
   "leo_n",
   "li",
   "limo_n",
@@ -512,6 +517,11 @@
   "zzz": "50f483b1ede7",
   "jjj": "2fd2e5e5318f",
   "muy-bien": "5b2c9d09bc6e",
-  "tienes-un-nuevo-amigo": "ca7b0dff75d5"
+  "tienes-un-nuevo-amigo": "ca7b0dff75d5",
+  "elige-una-letra-y-una-vocal-luego-pulsa-juntar": "895aa7d4339f",
+  "escucha-y-toca-la-si_laba-que-oyes": "1c76abd08c8d",
+  "escucha-la-palabra-y-toca-sus-si_labas-en-orden": "233c386a3f47",
+  "lee-la-palabra-y-toca-su-dibujo": "aec1baa2036e",
+  "juega-y-gana-estrellas-con-cinco-estrellas-tienes-un-nuevo-amigo": "a6eeff40b9e9"
  }
 }
