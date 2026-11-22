@@ -172,6 +172,12 @@ def textos(d):
         out.append(w["w"])
         out.extend(w["s"])
     out.extend(d["LETTER_NAMES"].values())
+    # Tren: «la eme con la e» (la sílaba va en su propio audio)
+    if d.get("JOIN"):
+        for c in d["ALL_CONS"]:
+            for v in d["VOWELS"]:
+                if silaba(c, v):
+                    out.append(d["JOIN"].replace("{c}", d["LETTER_NAMES"][c]).replace("{v}", v.lower()))
     # palabras de «Lee la frase» (se dicen una a una: ayuda y refuerzo)
     fr = d.get("SENTENCES")
     if fr:
@@ -184,6 +190,21 @@ def textos(d):
             vistos.add(t.lower())
             res.append(t)
     return res
+
+
+NOMBRES_LETRAS = set()  # se rellena en main() con LETTER_NAMES de data.js
+
+
+def version_data_js():
+    """Pone en index.html  data.js?v=<resumen de data.js>  para que el navegador no mezcle
+    un index.html nuevo con un data.js viejo guardado en caché."""
+    h = hashlib.sha1((ROOT / "data.js").read_bytes()).hexdigest()[:10]
+    idx = ROOT / "index.html"
+    html = idx.read_text(encoding="utf-8")
+    nuevo = re.sub(r'<script src="data\.js(\?v=[^"]*)?"></script>', f'<script src="data.js?v={h}"></script>', html)
+    if nuevo != html:
+        idx.write_text(nuevo, encoding="utf-8")
+        print(f"index.html: data.js?v={h}")
 
 
 def quitar_tildes(t):
@@ -233,6 +254,8 @@ class Google:
         t = unicodedata.normalize("NFC", texto.lower())
         if t in continuos:
             return t  # se construyen aparte (ver _continuo)
+        if t in NOMBRES_LETRAS and " " not in t:
+            return t.capitalize() + "."  # «ene» sonaba «bene»; «Ene.» suena bien
         t = re.sub(r"^rr", "r", t)
         # «Ci.» lo lee «ce-i» (como el número romano CI o como siglas); en España
         # «zi» suena exactamente igual
@@ -503,6 +526,8 @@ def main():
     a = ap.parse_args()
 
     d = cargar_datos()
+    version_data_js()
+    NOMBRES_LETRAS.update(v.lower() for v in d["LETTER_NAMES"].values())
     continuos = {v.lower() for v in d.get("CONTINUANT", {}).values()}  # sonidos largos (ya no se usan)
     lista = textos(d)
 

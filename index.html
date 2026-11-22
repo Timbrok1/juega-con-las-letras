@@ -228,10 +228,11 @@ input[type=range]{width:100%}
 <div id="party"></div>
 <div id="modal"><div class="box"><div class="petbig" id="mPet"></div><h2 style="margin:6px 0">¡Nuevo amigo!</h2><button class="big" id="mOk">¡Bien! 🎉</button></div></div>
 
-<script src="data.js"></script>
+<!-- ?v= cambia con cada data.js nuevo (lo pone generar_audios.py): así nunca se mezcla un index.html nuevo con un data.js viejo de la caché -->
+<script src="data.js?v=902e12efee"></script>
 <script>
 /* letras, palabras y frases: en data.js (lo comparte el generador de audios) */
-const {VOWELS,ALL_CONS,LETTER_NAMES,WORDS,PHRASES,ORDER}=window.DATA;
+const {VOWELS,ALL_CONS,LETTER_NAMES,WORDS,PHRASES,ORDER,JOIN}=window.DATA;
 const COLORS=['#FF7A59','#3DB5E6','#5DBB63','#F7B731','#A77BDB','#F06292'];
 const PETS=['🐣','🐢','🦖','🐙','🦄','🐳','🦊','🐝','🦉','🐬','🦋','🐲','🦔','🐧','🦁','🐼','🦩','🐨','🦕','🐞'];
 const PER_PET=5;
@@ -402,7 +403,9 @@ function initTren(){tC=null;tV=null;$('wag1').textContent='?';$('wag2').textCont
 $('wag1').onclick=()=>{if(tC)say(LETTER_NAMES[tC]);};
 $('wag2').onclick=()=>{if(tV)say(tV);};
 $('join').onclick=()=>{if(!tC||!tV||!syl(tC,tV)){$('join').classList.add('shake');setTimeout(()=>$('join').classList.remove('shake'),400);return;}
-  const s=syl(tC,tV);const tr=$('train');tr.classList.remove('joined');void tr.offsetWidth;tr.classList.add('joined');say(s,S.rate*0.85);
+  const s=syl(tC,tV);const tr=$('train');tr.classList.remove('joined');void tr.offsetWidth;tr.classList.add('joined');
+  /* «la eme con la e» + «me» (dos audios: dentro de la frase, Google deletrea la sílaba) */
+  sayAll([JOIN.replace('{c}',LETTER_NAMES[tC]).replace('{v}',tV.toLowerCase()),s],S.rate*0.9,false,250);
   if(!tSeen.has(s)){tSeen.add(s);if(tSeen.size%3===0){addStar();party();}}};
 
 /* ---------- CAZA ---------- */
@@ -497,7 +500,7 @@ $('letraSay').onclick=()=>nTarget&&say(LNAME(nTarget));
    Frase escrita SIN audio («el sapo toma sopa») y 3 dibujos de pareja de emojis (🐸🍲).
    Las opciones falsas comparten sujeto u objeto con la buena, así que hay que leer la frase
    entera. Tras 2 fallos se leen las palabras despacio. Al acertar se lee la frase. */
-const FR=window.DATA.SENTENCES;
+const FR=window.DATA.SENTENCES||{verb:'',subjects:[],objects:[]};
 const frases=()=>{const ok=okLetters(),out=[];
   FR.subjects.forEach(([sj,se],i)=>FR.objects.forEach(([ob,oe],j)=>{const t=`${sj} ${FR.verb} ${ob}`;
     /* cada palabra por separado: «el loro» no lleva LL */

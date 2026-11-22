@@ -6,7 +6,7 @@
      se descargan los que falten y se borran los que ya no están en audio/manifest.json.
    - Fuentes e iconos: primero la copia guardada.
    Sube VERSION si cambias este archivo o la lista APP. */
-const VERSION = 'v1';
+const VERSION = 'v2';
 const APP_CACHE = 'app-' + VERSION;
 const MEDIA_CACHE = 'media';
 const APP = ['./', 'index.html', 'data.js', 'manifest.webmanifest', 'audio/manifest.json',
@@ -46,7 +46,9 @@ function networkFirst(req) {
     const fromCache = () => caches.match(req).then(r => r || (req.mode === 'navigate' ? caches.match('./') : undefined));
     /* red lenta: si a los 3 s no ha llegado nada, se usa la copia guardada */
     const t = setTimeout(() => fromCache().then(finish), 3000);
-    fetch(req).then(res => {
+    /* cache:'no-cache': pregunta al servidor si hay versión nueva en vez de fiarse de la
+       caché HTTP del navegador (GitHub Pages deja guardar 10 min y se mezclaban versiones) */
+    fetch(new Request(req.url, { cache: 'no-cache', credentials: 'same-origin' })).then(res => {
       if (res.ok) { const copy = res.clone(); caches.open(APP_CACHE).then(c => c.put(req, copy)); }
       finish(res);
     }).catch(() => fromCache().then(r => { if (!finish(r)) finish(Response.error()); }));

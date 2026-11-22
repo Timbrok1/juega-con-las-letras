@@ -41,7 +41,7 @@ try:
   ok(r['st']==206 and r['len']==100 and r['same'] and r['cr']==f"bytes 10-109/{r['size']}",f'Range -> {r}')
   def juegos(tag):
     pg.evaluate('window.__played=[]')
-    pg.click('[data-go=tren]');pg.click('#consRow .chip[data-c=M]');pg.wait_for_timeout(300);pg.click('#vowRow .chip[data-v=A]');pg.click('#join');pg.wait_for_timeout(600);pg.click('#tren [data-back]')
+    pg.click('[data-go=tren]');pg.click('#consRow .chip[data-c=M]');pg.wait_for_timeout(300);pg.click('#vowRow .chip[data-v=A]');pg.click('#join');pg.wait_for_timeout(2200);pg.click('#tren [data-back]')
     pg.click('[data-go=caza]');pg.wait_for_timeout(700)
     for bb in pg.query_selector_all('#bubbles .bubble'):
       bb.click();pg.wait_for_timeout(300)
@@ -50,7 +50,7 @@ try:
     pg.click('[data-go=palabra]');pg.wait_for_timeout(600);pg.click('#pic');pg.wait_for_timeout(600);pg.click('#palabra [data-back]')
     pg.click('[data-go=lee]');pg.wait_for_timeout(300);w=pg.inner_text('#leeWord');pg.click('#lee [data-back]')
     pl=pg.evaluate('window.__played')
-    ok(any(x.startswith('eme.mp3') for x in pl) and any(x.startswith('ma.mp3') for x in pl) and any(x.startswith('muy-bien') for x in pl),f'[{tag}] suenan MP3: {pl[:9]}')
+    ok(any(x.startswith('eme.mp3') for x in pl) and any(x.startswith('la-eme-con-la-a.mp3') for x in pl) and any(x.startswith('ma.mp3') for x in pl) and any(x.startswith('muy-bien') for x in pl),f'[{tag}] suenan MP3: {pl[:9]}')
     ok(len(w)>1,f'[{tag}] Lee y elige: {w}')
   juegos('con red');pg.screenshot(path=f'{OUT}/home.png')
   # Encuentra la letra: suena el nombre, se acierta, la estrella sube

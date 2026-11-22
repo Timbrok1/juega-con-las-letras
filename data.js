@@ -3,6 +3,7 @@
    sin comas finales ni comentarios) para que Python lo pueda leer.
    Al añadir palabras o frases, ejecuta el generador para crear sus audios.
    LETTER_NAMES: nombre de cada consonante (RAE); lo dice el Tren al tocarla.
+   JOIN: lo que dice el Tren al juntar, antes de la sílaba («la eme con la e» + «me»).
    SENTENCES: «Lee la frase» forma frases «sujeto + verb + objeto»; el dibujo es la pareja
    de emojis. Solo salen las frases cuyas letras están todas activas.
    ORDER: orden en que se enseñan las consonantes (lo usa «Activar hasta…» del panel
@@ -17,6 +18,7 @@ window.DATA={
   "subjects": [["el pato", "🦆"], ["el sapo", "🐸"], ["la mamá", "👩"], ["el papá", "👨"], ["el mono", "🐒"], ["la vaca", "🐮"], ["el gato", "🐱"], ["el niño", "👦"], ["la foca", "🦭"], ["el loro", "🦜"], ["la jirafa", "🦒"], ["el bebé", "👶"]],
   "objects": [["sopa", "🍲"], ["la pelota", "⚽"], ["la maleta", "🧳"], ["la lupa", "🔍"], ["un tomate", "🍅"], ["un dado", "🎲"], ["la llave", "🔑"], ["un helado", "🍦"], ["leche", "🥛"], ["un limón", "🍋"], ["una seta", "🍄"], ["la taza", "☕"], ["queso", "🧀"], ["una piña", "🍍"], ["un coco", "🥥"], ["una uva", "🍇"], ["la vela", "🕯️"], ["la moto", "🏍️"], ["un regalo", "🎁"], ["la rosa", "🌹"]]
  },
+ "JOIN": "la {c} con la {v}",
  "PHRASES": {
   "muyBien": "¡Muy bien!",
   "nuevoAmigo": "¡Tienes un nuevo amigo!",
