@@ -6,9 +6,11 @@ vocales, sílabas de todas las consonantes, palabras y sus sílabas,
 sonidos continuos (mmm, sss...) y frases fijas.
 
 Motores:
-  - elevenlabs (por defecto): voz «Sarah» con el modelo eleven_v3 en español.
-    Necesita ELEVENLABS_API_KEY en el archivo .env de la raíz (nunca se sube a git).
-    Las respuestas se guardan en una caché local para no gastar créditos dos veces.
+  - google (por defecto): voz «es-ES-Chirp3-HD-Aoede» de Google Cloud Text-to-Speech,
+    nativa de España. Necesita GOOGLE_TTS_API_KEY en el archivo .env de la raíz.
+  - elevenlabs: voz «Sarah» con el modelo eleven_v3 (acento inglés). ELEVENLABS_API_KEY en .env.
+    Las respuestas de los motores en la nube se guardan en una caché local
+    (~/.cache/juego-lectura) para no gastar dos veces.
   - piper: voz neuronal local y gratuita (peor calidad). pip install piper-tts
 
 Es idempotente: solo genera lo que falta o lo que ha cambiado (texto, motor,
@@ -22,12 +24,13 @@ Uso:
     python tools/generar_audios.py --rehacer ma xi    # vuelve a pedir esos textos (otra toma)
     python tools/generar_audios.py --forzar           # lo regenera todo (usa la caché)
     python tools/generar_audios.py --limpiar          # borra MP3 que ya no se usan
-    python tools/generar_audios.py --motor piper      # usar Piper en lugar de ElevenLabs
+    python tools/generar_audios.py --motor piper      # usar Piper (local) o --motor elevenlabs
 
 Requisitos: ffmpeg en el PATH; para Piper, pip install -r tools/requirements.txt
 """
 import argparse
 import array
+import base64
 import hashlib
 import math
 import json
@@ -50,7 +53,13 @@ AUDIO = ROOT / "audio"
 MANIFEST = AUDIO / "manifest.json"
 CACHE = Path(os.environ.get("AUDIO_CACHE", Path.home() / ".cache/juego-lectura"))
 
-# ElevenLabs: elegida a ciegas entre 6 voces (la que sonaba más nativa en las sílabas)
+# Google Cloud Text-to-Speech: voz por defecto. Elegida a ciegas entre 11 voces nativas
+# de España de Google y la de ElevenLabs (que sonaba a acento inglés).
+GG_VOZ = "es-ES-Chirp3-HD-Aoede"
+GG_IDIOMA = "es-ES"
+
+# ElevenLabs (alternativa): Sarah es una voz de origen inglés; las nativas de España
+# de la biblioteca no se pueden usar por API en el plan gratuito.
 EL_VOZ = "EXAVITQu4vr4xnSDxMaL"  # Sarah (voz de serie, permitida en el plan gratuito)
 EL_MODELO = "eleven_v3"
 EL_IDIOMA = "es"
@@ -172,6 +181,16 @@ def textos(d):
     return res
 
 
+def quitar_tildes(t):
+    t = unicodedata.normalize("NFD", t)
+    return unicodedata.normalize("NFC", "".join(c for c in t if unicodedata.category(c) != "Mn" or c == "\u0303"))
+
+
+def es_silaba(t):
+    """Una sola palabra con un solo grupo de vocales (MA, PAN, FUE, ÓN)."""
+    return bool(re.fullmatch(r"[a-zñáéíóúü]+", t)) and len(re.findall(r"[aeiouáéíóúü]+", t)) == 1
+
+
 def leer_env(nombre):
     if os.environ.get(nombre):
         return os.environ[nombre]
@@ -184,6 +203,141 @@ def leer_env(nombre):
 
 
 # ---------------------------------------------------------------- motores
+
+class Google:
+    nombre = "google"
+
+    def __init__(self):
+        self.key = leer_env("GOOGLE_TTS_API_KEY")
+        if not self.key:
+            sys.exit("Falta GOOGLE_TTS_API_KEY en el archivo .env de la raíz del proyecto.")
+        self.cache = CACHE / "google"
+        self.cache.mkdir(parents=True, exist_ok=True)
+        self.gastado = 0
+
+    def ajustes(self):
+        return {"motor": self.nombre, "voz": GG_VOZ, "idioma": GG_IDIOMA, "silabas": "Mayuscula-punto-v1", "continuos": "recorte-silaba-v4"}
+
+    def entrada(self, texto, continuos):
+        """Texto que se le pide a Google.
+
+        Chirp 3 HD lee como siglas muchas sílabas sueltas («ga» -> «ge a», «ón» ->
+        «o con acento agudo ene», «rra» -> «erre erre a»). Con mayúscula inicial,
+        sin tilde y con punto («Ga.», «On.») las lee como una palabra. La R inicial
+        ya es fuerte en español, así que RRA se pide como «Ra.»."""
+        t = unicodedata.normalize("NFC", texto.lower())
+        if t in continuos:
+            return t  # se construyen aparte (ver _continuo)
+        t = re.sub(r"^rr", "r", t)
+        if es_silaba(t):
+            return quitar_tildes(t).capitalize() + "."
+        return t
+
+    def _cache(self, entrada):
+        # solo lo que cambia la respuesta de Google (no los ajustes de postproceso)
+        h = hashlib.sha1(json.dumps([entrada, GG_VOZ, GG_IDIOMA], ensure_ascii=False).encode()).hexdigest()[:16]
+        return self.cache / f"{h}.mp3"
+
+    def olvidar(self, entrada):
+        self._cache(entrada).unlink(missing_ok=True)
+
+    def _pedir(self, texto):
+        body = {"input": {"text": texto}, "voice": {"languageCode": GG_IDIOMA, "name": GG_VOZ},
+                "audioConfig": {"audioEncoding": "MP3", "sampleRateHertz": 44100}}
+        url = "https://texttospeech.googleapis.com/v1/text:synthesize?key=" + self.key
+        for intento in range(6):
+            req = urllib.request.Request(url, data=json.dumps(body).encode(), headers={"Content-Type": "application/json"})
+            try:
+                with urllib.request.urlopen(req, timeout=120) as f:
+                    datos = base64.b64decode(json.load(f)["audioContent"])
+                self.gastado += len(texto)
+                return datos
+            except urllib.error.HTTPError as e:
+                detalle = e.read().decode(errors="replace")[:300]
+                if e.code in (429, 500, 502, 503, 504) and intento < 5:
+                    time.sleep(2 * 2 ** intento)
+                    continue
+                sys.exit(f"Google respondió {e.code}: {detalle}")
+
+    def _obtener(self, entrada):
+        """MP3 de la caché o pedido a Google, comprobando que tiene voz y que una
+        sílaba no ha salido deletreada (una sílaba dura < 0,8 s; deletreada, más)."""
+        c = self._cache(entrada)
+        silaba = entrada.endswith(".") and es_silaba(entrada[:-1].lower())
+        def vale(p):
+            if not tiene_voz(p):
+                return False
+            if silaba:
+                z = zona_de_voz(p)
+                return z is not None and z[1] - z[0] < 0.8
+            return True
+        if c.exists() and not vale(c):
+            c.unlink()
+        if not c.exists():
+            base = entrada[:-1] if silaba else entrada
+            # Google a veces devuelve silencio o deletrea: se prueba con variantes que
+            # suenan igual, y la serie se repite porque la misma petición no siempre
+            # da el mismo resultado
+            variantes = [entrada, "¡" + base + "!", '"' + base.lower() + '"', base.lower() + "."]
+            if re.fullmatch(r"[aeiou]", base.lower()):
+                variantes.append(base + "h.")
+            tmp = c.with_suffix(".part.mp3")
+            for texto in variantes * 3:
+                tmp.write_bytes(self._pedir(texto))
+                if vale(tmp):
+                    break
+            else:
+                tmp.unlink(missing_ok=True)
+                sys.exit(f"Google no da un audio válido para «{entrada}».")
+            tmp.replace(c)
+        return c
+
+    def _continuo(self, entrada, salida):
+        """Sonidos largos (mmm, sss…). M y N salen bien pidiendo «Mmmmmm.»; el resto
+        Google lo deletrea, así que se recorta la consonante del principio de la
+        sílaba («Sa.») y se alarga sin cambiar el tono."""
+        letra = entrada[0]
+        if letra in "mn":
+            # el zumbido sale bien pidiéndolo tal cual; solo se alarga hasta ~0,9 s
+            src = self._obtener(letra.upper() + letra * 5 + ".")
+            z = zona_de_voz(src)
+            a, b = z
+            ganancia = 0.0
+            return self._estirar(src, a, b, ganancia, salida)
+        silaba = self._obtener(letra.upper() + "a.")
+        env = envolvente(silaba)
+        z = zona_de_voz(silaba)
+        pico = max(env)
+        # la vocal empieza donde el volumen llega a 6 dB del pico
+        voc = next((i for i in range(len(env)) if env[i] >= pico - 6), len(env))
+        # la consonante, desde que hay algo de sonido (> -55 dB, hasta 0,2 s antes)
+        ini = voc - 1
+        while ini > 0 and voc - ini < int(0.2 / VENTANA) and env[ini - 1] > -55:
+            ini -= 1
+        a, b = ini * VENTANA, voc * VENTANA
+        largo = b - a
+        # suelta, la consonante suena flojita: se sube hasta 6 dB por debajo de la vocal
+        seg = env[int(a / VENTANA):int(b / VENTANA)] or [pico]
+        ganancia = max(0.0, min(24.0, (pico - 6) - max(seg)))
+        return self._estirar(silaba, a, b, ganancia, salida)
+
+    def _estirar(self, src, a, b, ganancia, salida):
+        """Recorta [a, b] de src y lo alarga hasta unos 0,9 s sin cambiar el tono."""
+        factor = max(0.03, min(1.0, (b - a) / 0.9))
+        cadena = []
+        while factor < 0.5:
+            cadena.append("atempo=0.5")
+            factor /= 0.5
+        cadena.append(f"atempo={factor:.3f}")
+        wav = salida.with_suffix(".wav")
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(src), "-af",
+                        f"atrim=start={a:.3f}:end={b:.3f},asetpts=PTS-STARTPTS,volume={ganancia:.1f}dB," + ",".join(cadena) +
+                        ",afade=t=in:d=0.08,areverse,afade=t=in:d=0.2,areverse", str(wav)], check=True)
+        return wav
+
+    def sintetizar(self, entrada, salida, continuo):
+        return self._continuo(entrada, salida) if continuo else self._obtener(entrada)
+
 
 class ElevenLabs:
     nombre = "elevenlabs"
@@ -237,7 +391,7 @@ class ElevenLabs:
             # con textos muy cortos («o», «lll») el modelo a veces devuelve silencio:
             # se reintenta con otra semilla, luego con variantes del texto y, como
             # último recurso, con el modelo multilingüe v2 de la misma voz
-            tmp = c.with_suffix(".tmp")
+            tmp = c.with_suffix(".part.mp3")
             intentos = [(entrada, EL_MODELO), (entrada, EL_MODELO), (entrada + ".", EL_MODELO), ("¡" + entrada + "!", EL_MODELO)]
             if continuo:
                 intentos.insert(2, (entrada + entrada[0] * 4, EL_MODELO))
@@ -310,7 +464,9 @@ class Piper:
 def postprocesar(origen, destino, continuo, estirar):
     if estirar:  # Piper: audio limpio, basta con recortar los silencios
         filtro = RECORTE + ("," + ESTIRA if continuo else "") + ",apad=pad_dur=0.04"
-    else:  # ElevenLabs: se corta justo la zona de voz
+    elif continuo and origen.suffix == ".wav":  # sonido largo ya recortado (Google)
+        filtro = "anull"
+    else:  # nube: se corta justo la zona de voz
         z = zona_de_voz(origen)
         if z is None:
             sys.exit(f"Sin voz en {origen}")
@@ -329,7 +485,7 @@ def postprocesar(origen, destino, continuo, estirar):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--motor", choices=["elevenlabs", "piper"], default="elevenlabs")
+    ap.add_argument("--motor", choices=["google", "elevenlabs", "piper"], default="google")
     ap.add_argument("--voz", default=PIPER_VOZ, help=f"voz de Piper (por defecto {PIPER_VOZ})")
     ap.add_argument("--hablante", help="hablante de Piper en voces con varios (p. ej. F en es_ES-sharvard-medium)")
     ap.add_argument("--rehacer", nargs="+", metavar="TEXTO", help="volver a pedir estos textos (otra toma)")
@@ -350,7 +506,7 @@ def main():
 
     if not shutil.which("ffmpeg"):
         sys.exit("Falta ffmpeg (sudo apt install ffmpeg).")
-    motor = ElevenLabs() if a.motor == "elevenlabs" else Piper(a.voz, a.hablante)
+    motor = {"google": Google, "elevenlabs": ElevenLabs}[a.motor]() if a.motor != "piper" else Piper(a.voz, a.hablante)
     estirar = motor.nombre == "piper"
     ajustes = motor.ajustes()
 
@@ -406,7 +562,7 @@ def main():
             (AUDIO / n).unlink()
     elif sobran:
         print(f"Aviso: {len(sobran)} MP3 que ya no se usan (bórralos con --limpiar): {', '.join(sobran[:10])}")
-    gasto = f" Caracteres enviados a ElevenLabs: {motor.gastado}." if motor.nombre == "elevenlabs" else ""
+    gasto = f" Caracteres enviados a {motor.nombre}: {motor.gastado}." if motor.nombre != "piper" else ""
     print(f"Listo: {nuevos} generados, {len(plan) - nuevos} ya estaban. Total {len(plan)} audios.{gasto}")
 
 

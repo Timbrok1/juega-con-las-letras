@@ -27,15 +27,15 @@ El progreso se guarda en `localStorage` del navegador.
 Abre la web en Safari → **Compartir** → **Añadir a pantalla de inicio**. Se abre a pantalla completa y, tras la primera carga con internet, funciona sin conexión (guarda los audios en el móvil). La app instalada lleva su propio progreso, distinto del de Safari.
 
 ## Audios
-Todo lo que dice el juego está pregrabado en `audio/` con la voz «Sarah» de [ElevenLabs](https://elevenlabs.io) (modelo v3, en español). Al añadir palabras o frases en `data.js`, regenera lo que falte:
+Todo lo que dice el juego está pregrabado en `audio/` con la voz «Aoede» (Chirp 3 HD, español de España) de Google Cloud Text-to-Speech. Al añadir palabras o frases en `data.js`, regenera lo que falte:
 
 ```bash
-# una vez: crea .env en la raíz con la línea  ELEVENLABS_API_KEY=sk_...
+# una vez: crea .env en la raíz con la línea  GOOGLE_TTS_API_KEY=AIza...
 python3 tools/generar_audios.py                 # solo genera lo nuevo (requiere ffmpeg)
 python3 tools/generar_audios.py --rehacer ma    # otra toma de un audio que suene mal
 ```
 
-Alternativa gratuita y local (peor calidad): `--motor piper` (ver `tools/requirements.txt`).
+Alternativas: `--motor elevenlabs` (ELEVENLABS_API_KEY) o `--motor piper` (local y gratuita, peor calidad; ver `tools/requirements.txt`).
 
 ## Publicación
 Se publica con GitHub Pages desde la rama `main` (carpeta raíz). Cada `git push` actualiza la web en uno o dos minutos.
