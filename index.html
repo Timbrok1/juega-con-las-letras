@@ -81,6 +81,7 @@ h1{font-size:28px;margin:4px 0 0;text-align:center}
 .seg{display:flex;gap:8px;flex-wrap:wrap}
 .seg button{border:2px solid #ddd;background:#fff;border-radius:12px;padding:10px 14px;font-size:16px;font-weight:700}
 .seg button.sel{border-color:var(--ink);background:var(--ink);color:#fff}
+.seg button .new{display:block;font:800 11px 'Nunito',sans-serif;color:var(--d);text-transform:uppercase;letter-spacing:.5px}
 input[type=range]{width:100%}
 /* fiesta */
 #party{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:50}
@@ -169,10 +170,7 @@ input[type=range]{width:100%}
   <div class="panel">
     <h3>Consonantes que ya conoce</h3>
     <div class="seg L" id="setCons"></div>
-    <p class="hint" style="text-align:left;margin:0">Las vocales están siempre activas. Marca solo las letras dadas en clase.</p>
-    <h3 style="margin-top:6px">Activar hasta la letra…</h3>
-    <div class="seg L" id="setUpTo"></div>
-    <p class="hint" style="text-align:left;margin:0">Activa de golpe todas las letras hasta la que toques, en el orden habitual de las cartillas (se puede cambiar en <code>data.js</code>). La última letra activada se practica más.</p>
+    <p class="hint" style="text-align:left;margin:0">Toca una letra para activarla o desactivarla. Están en el orden habitual de las cartillas. La última que actives queda marcada como <b>nueva</b> y se practica el doble. Las vocales están siempre activas.</p>
   </div>
   <div class="panel">
     <h3>Tipos de sílaba en las palabras</h3>
@@ -223,7 +221,7 @@ const PER_PET=5;
 const DEF={cons:['M','P','L','T'],kase:'upper',font:'Andika',rate:0.8,stars:0,voiceURI:null,resetAt:0,sylTypes:[],stats:{},newest:null};
 let S=Object.assign({},DEF);
 try{const raw=localStorage.getItem('lecturaCasa');if(raw)S=Object.assign({},DEF,JSON.parse(raw));}catch(e){}
-function fixState(){if(!S.stats||typeof S.stats!=='object')S.stats={};if(!Array.isArray(S.sylTypes))S.sylTypes=[];}
+function fixState(){if(Array.isArray(S.cons))S.cons=window.DATA.ORDER.filter(x=>S.cons.includes(x));if(!S.stats||typeof S.stats!=='object')S.stats={};if(!Array.isArray(S.sylTypes))S.sylTypes=[];}
 fixState();
 /* guardado: local + base de datos del artefacto (persistente entre sesiones y dispositivos) */
 let remote=null,writing=false,dirty=false;
@@ -462,13 +460,11 @@ gear.addEventListener('contextmenu',e=>e.preventDefault());
 let resetArmed=false;
 function applyLook(){document.documentElement.style.setProperty('--letter',S.font==='system-ui'?'system-ui,sans-serif':`'${S.font}',sans-serif`);}
 function renderPadres(){resetArmed=false;$('reset').textContent='Reiniciar estrellas y amigos';
-  $('setCons').innerHTML=ALL_CONS.map(c=>`<button data-c="${c}" class="${S.cons.includes(c)?'sel':''}">${c} ${c.toLowerCase()}</button>`).join('');
+  /* consonantes en el orden de la cartilla (ORDER); la última activada se marca como «nueva» */
+  $('setCons').innerHTML=ORDER.map(c=>`<button data-c="${c}" class="${S.cons.includes(c)?'sel':''}">${c} ${c.toLowerCase()}${S.newest===c&&S.cons.includes(c)?'<span class="new">nueva</span>':''}</button>`).join('');
   $('setCons').querySelectorAll('button').forEach(b=>b.onclick=()=>{const c=b.dataset.c;
     if(S.cons.includes(c)){if(S.cons.length===1)return;S.cons=S.cons.filter(x=>x!==c);if(S.newest===c)S.newest=null;}
-    else{S.cons=ALL_CONS.filter(x=>S.cons.includes(x)||x===c);S.newest=c;}save();renderPadres();prefetchAudios();});
-  $('setUpTo').innerHTML=ORDER.map(c=>`<button data-c="${c}" class="${S.newest===c?'sel':''}">${c}</button>`).join('');
-  $('setUpTo').querySelectorAll('button').forEach(b=>b.onclick=()=>{const i=ORDER.indexOf(b.dataset.c);
-    S.cons=ALL_CONS.filter(x=>ORDER.indexOf(x)<=i);S.newest=b.dataset.c;save();renderPadres();prefetchAudios();});
+    else{S.cons=ORDER.filter(x=>S.cons.includes(x)||x===c);S.newest=c;}save();renderPadres();prefetchAudios();});
   $('setTypes').innerHTML=Object.entries(TYPES).map(([k,l])=>`<button data-t="${k}" class="${S.sylTypes.includes(k)?'sel':''}">${l}</button>`).join('');
   $('setTypes').querySelectorAll('button').forEach(b=>b.onclick=()=>{const t=b.dataset.t;
     S.sylTypes=S.sylTypes.includes(t)?S.sylTypes.filter(x=>x!==t):[...S.sylTypes,t];save();renderPadres();prefetchAudios();});

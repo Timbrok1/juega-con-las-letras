@@ -31,7 +31,7 @@ Descartados por decisión del padre: trazar letras (difícil en móvil) y Memory
 ### Panel de padres
 Se abre manteniendo pulsado ⚙️ 1,5 s. Permite:
 - Activar consonantes (todas, incluidas CH, LL, Ñ, RR, Q). Las vocales siempre están activas.
-- «Activar hasta la letra…»: activa todas las letras hasta esa en el orden `ORDER` de `data.js`. Es un orden habitual de cartilla, no el oficial de Cokitos; ajustarlo si el cuaderno sigue otro. La última letra activada queda en `S.newest`.
+- Las consonantes aparecen en el orden `ORDER` de `data.js` (orden habitual de cartilla, no el oficial de Cokitos; ajustarlo si el cuaderno sigue otro). Se tocan una a una; la última activada queda en `S.newest`, se marca como «nueva» y se practica el doble. `S.cons` se guarda en ese orden (también el de los chips del Tren). Antes había además un atajo «Activar hasta la letra…», eliminado por confuso.
 - Tipos de sílaba permitidos en las palabras (`S.sylTypes`): las directas siempre; opcionalmente con letra al final, trabadas y dos vocales juntas. Por defecto solo directas.
 - «Lo que más le cuesta» (según el historial) y botón para borrar el historial.
 - Mayúsculas / minúsculas.
