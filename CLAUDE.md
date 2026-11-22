@@ -19,14 +19,15 @@ Sin build ni dependencias y sin nada cargado de fuera:
 
 ### Juegos
 - **Instrucciones habladas** (`PHRASES.instr*`): suenan la primera vez que entra en cada juego en la visita (`introSeen`) y con el botón ❓ de la cabecera. En Tren, Lee y Amigos no suenan si ya ha tocado algo (`tappedSince()`), para no cortarle. En Caza y Construye van seguidas de la sílaba o palabra.
+- **Encuentra la letra** (🔤, primero en el inicio): suena el nombre de una letra («eme») y hay que tocarla entre vocales y consonantes activas. 2 opciones; 3 tras 3 aciertos seguidos y 4 tras 6 (`nStreak`). Una de las falsas se parece a la buscada si se puede (`LOOKALIKE`: M/N, B/D/P/R, E/F, L/LL…). ⭐ solo a la primera. Historial `n:M`.
 - **Tren de sílabas**: al tocar una consonante se oye su nombre («eme», `LETTER_NAMES` en `data.js`, nombres de la RAE); al tocar la vocal, la vocal («o»); al pulsar «Juntar», la sílaba («mo»). Decisión del padre: antes sonaban sonidos largos («mmm»). 1 ⭐ cada 3 sílabas *distintas* (en `tSeen`, se reinicia al recargar la web). Con QU se desactivan A, O y U.
 - **Caza la sílaba**: suena una sílaba y toca la burbuja correcta. Al acertar solo dice «¡Muy bien!», sin repetir la sílaba. 2 opciones; 3 tras 3 aciertos a la primera seguidos y 4 tras 6 (`cStreak`; un fallo baja un nivel). ⭐ solo si acierta a la primera. No repite la misma sílaba dos veces seguidas.
 - **Construye la palabra**: dibujo (emoji) + palabra hablada; toca las sílabas en orden. Incluye 1–2 sílabas distractoras, y una más tras 3 palabras seguidas sin fallos (`pStreak`). ⭐ si la completa con 1 fallo como mucho.
 - **Lee y elige**: palabra escrita SIN audio, elige el dibujo entre 3 (4 tras 4 aciertos seguidos, `lStreak`). Tras 2 fallos lee las sílabas despacio (nunca la palabra entera). ⭐ solo si acierta a la primera.
 - Si acierta tras fallar: «¡Muy bien!» y animación verde, pero sin estrella ni confeti.
+- **Lee la frase** (💬): frase escrita SIN audio, «sujeto + toma + objeto» (`SENTENCES` en `data.js`: 12 sujetos × 20 objetos), y 3 dibujos hechos con dos emojis (🐸🍲); 4 tras 4 aciertos seguidos. Las falsas comparten sujeto u objeto con la buena (👩🧳 / 👩⚽ / 👨🧳), así que hay que leer la frase entera. Tras 2 fallos se leen las palabras despacio; al acertar, «¡Muy bien!» y la frase palabra a palabra. Solo salen frases con todas sus letras activas (comprobando cada palabra por separado; no mira los tipos de sílaba). ⭐ solo a la primera. Historial `f:<frase>`.
 - **Mis amigos**: cada 5 ⭐ se desbloquea un personaje (emoji genérico).
 
-Descartados por decisión del padre: trazar letras (difícil en móvil) y Memory (no le gustó).
 
 ### Panel de padres
 Se abre manteniendo pulsado ⚙️ 1,5 s. Permite:
@@ -102,7 +103,11 @@ En iOS, `speechSynthesis` solo ofrece a las webs voces básicas, así que todo l
 - No usar personajes, dibujos ni la tipografía de Cokitos ni de otras marcas (Pokémon, etc.); solo emojis genéricos o personajes propios.
 - La fuente es configurable porque la de Cokitos no es pública. Cuando pasen a minúsculas o letra ligada, comparar con el cuaderno.
 
-## Ideas de juegos no implementadas
-- ¿Con qué empieza?: dibujo + palabra, elegir la primera sílaba.
-- La sílaba que falta: PA __ con el dibujo del pato.
-- Palmas: contar las sílabas de una palabra.
+## Juegos descartados
+- Trazar letras (difícil en móvil) y Memory (no le gustó).
+- Palmas (contar sílabas): no le gustó al padre.
+- «¿Con qué empieza?» y «La sílaba que falta»: se parecían demasiado a «Caza la sílaba» y «Construye la palabra».
+
+## Ideas pendientes
+- «¿Qué dibujo empieza por…?»: suena «pa» y hay que elegir el dibujo que empieza así (al revés que Caza).
+- En «Encuentra la letra», emparejar mayúscula con minúscula cuando pasen a minúsculas.

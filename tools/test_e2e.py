@@ -53,6 +53,29 @@ try:
     ok(any(x.startswith('eme.mp3') for x in pl) and any(x.startswith('ma.mp3') for x in pl) and any(x.startswith('muy-bien') for x in pl),f'[{tag}] suenan MP3: {pl[:9]}')
     ok(len(w)>1,f'[{tag}] Lee y elige: {w}')
   juegos('con red');pg.screenshot(path=f'{OUT}/home.png')
+  # Encuentra la letra: suena el nombre, se acierta, la estrella sube
+  pg.evaluate('window.__played=[]');s0=pg.evaluate("JSON.parse(localStorage.getItem('lecturaCasa')).stars")
+  pg.click('[data-go=letra]');pg.wait_for_timeout(2600)
+  pl=pg.evaluate('window.__played');ok(any(x.startswith('escucha-y-toca-la-letra') for x in pl),f'letra: instrucción y nombre {pl[:3]}')
+  hecho=False
+  for i in range(4):
+    for bb in pg.query_selector_all('#letraOpts .bubble'):
+      bb.click();pg.wait_for_timeout(250)
+      if 'ok' in (bb.get_attribute('class') or ''):hecho=True;break
+    if hecho:break
+  ok(hecho and len(pg.query_selector_all('#letraOpts .bubble'))>=2,'letra: se puede acertar')
+  pg.screenshot(path=f'{OUT}/letra.png');pg.click('#letra [data-back]')
+  # Lee la frase: con las letras por defecto hay frases; 3 dibujos distintos
+  pg.click('[data-go=frase]');pg.wait_for_timeout(400)
+  fr=pg.inner_text('#fraseText');ops=[b.inner_text() for b in pg.query_selector_all('#fraseOpts .bubble')]
+  ok(len(fr.split())>=4 and len(ops)==3 and len(set(ops))==3,f'frase: «{fr}» opciones {ops}')
+  pg.evaluate('window.__played=[]')
+  for bb in pg.query_selector_all('#fraseOpts .bubble'):
+    bb.click();pg.wait_for_timeout(300)
+    if 'ok' in (bb.get_attribute('class') or ''):break
+  pg.wait_for_timeout(2500);pl=pg.evaluate('window.__played')
+  ok(any(x.startswith('toma') for x in pl),f'frase: al acertar se lee la frase {pl[-6:]}')
+  pg.screenshot(path=f'{OUT}/frase.png');pg.click('#frase [data-back]')
   # fase 3: instrucciones con ❓ e historial de aciertos/fallos
   pg.evaluate('window.__played=[]');pg.click('[data-go=caza]');pg.wait_for_timeout(500);pg.click('#caza [data-help]');pg.wait_for_timeout(300)
   ok(any(x.startswith('escucha-y-toca') for x in pg.evaluate('window.__played')),'botón ❓ repite la instrucción');pg.click('#caza [data-back]')

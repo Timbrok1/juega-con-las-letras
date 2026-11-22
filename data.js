@@ -3,6 +3,8 @@
    sin comas finales ni comentarios) para que Python lo pueda leer.
    Al añadir palabras o frases, ejecuta el generador para crear sus audios.
    LETTER_NAMES: nombre de cada consonante (RAE); lo dice el Tren al tocarla.
+   SENTENCES: «Lee la frase» forma frases «sujeto + verb + objeto»; el dibujo es la pareja
+   de emojis. Solo salen las frases cuyas letras están todas activas.
    ORDER: orden en que se enseñan las consonantes (lo usa «Activar hasta…» del panel
    de padres). Es un orden habitual en cartillas; cámbialo si el cole sigue otro. */
 window.DATA={
@@ -10,6 +12,11 @@ window.DATA={
  "ALL_CONS": ["B", "C", "CH", "D", "F", "G", "H", "J", "K", "L", "LL", "M", "N", "Ñ", "P", "Q", "R", "RR", "S", "T", "V", "W", "X", "Y", "Z"],
  "LETTER_NAMES": {"B": "be", "C": "ce", "CH": "che", "D": "de", "F": "efe", "G": "ge", "H": "hache", "J": "jota", "K": "ka", "L": "ele", "LL": "elle", "M": "eme", "N": "ene", "Ñ": "eñe", "P": "pe", "Q": "cu", "R": "erre", "RR": "erre doble", "S": "ese", "T": "te", "V": "uve", "W": "uve doble", "X": "equis", "Y": "ye", "Z": "zeta"},
  "ORDER": ["M", "P", "L", "S", "T", "D", "N", "F", "R", "B", "V", "C", "G", "J", "Ñ", "LL", "Y", "CH", "Z", "H", "Q", "K", "RR", "X", "W"],
+ "SENTENCES": {
+  "verb": "toma",
+  "subjects": [["el pato", "🦆"], ["el sapo", "🐸"], ["la mamá", "👩"], ["el papá", "👨"], ["el mono", "🐒"], ["la vaca", "🐮"], ["el gato", "🐱"], ["el niño", "👦"], ["la foca", "🦭"], ["el loro", "🦜"], ["la jirafa", "🦒"], ["el bebé", "👶"]],
+  "objects": [["sopa", "🍲"], ["la pelota", "⚽"], ["la maleta", "🧳"], ["la lupa", "🔍"], ["un tomate", "🍅"], ["un dado", "🎲"], ["la llave", "🔑"], ["un helado", "🍦"], ["leche", "🥛"], ["un limón", "🍋"], ["una seta", "🍄"], ["la taza", "☕"], ["queso", "🧀"], ["una piña", "🍍"], ["un coco", "🥥"], ["una uva", "🍇"], ["la vela", "🕯️"], ["la moto", "🏍️"], ["un regalo", "🎁"], ["la rosa", "🌹"]]
+ },
  "PHRASES": {
   "muyBien": "¡Muy bien!",
   "nuevoAmigo": "¡Tienes un nuevo amigo!",
@@ -17,7 +24,9 @@ window.DATA={
   "instrCaza": "Escucha, y toca la sílaba que oyes.",
   "instrPalabra": "Escucha la palabra, y toca sus sílabas en orden.",
   "instrLee": "Lee la palabra, y toca su dibujo.",
-  "instrAmigos": "Juega y gana estrellas. Con cinco estrellas, ¡tienes un nuevo amigo!"
+  "instrAmigos": "Juega y gana estrellas. Con cinco estrellas, ¡tienes un nuevo amigo!",
+  "instrLetra": "Escucha, y toca la letra.",
+  "instrFrase": "Lee la frase, y toca su dibujo."
  },
  "WORDS": [
   {"w": "MAMÁ", "s": ["MA", "MÁ"], "e": "👩"},

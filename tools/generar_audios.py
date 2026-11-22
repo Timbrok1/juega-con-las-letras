@@ -172,6 +172,11 @@ def textos(d):
         out.append(w["w"])
         out.extend(w["s"])
     out.extend(d["LETTER_NAMES"].values())
+    # palabras de «Lee la frase» (se dicen una a una: ayuda y refuerzo)
+    fr = d.get("SENTENCES")
+    if fr:
+        for parte in [fr["verb"]] + [x[0] for x in fr["subjects"] + fr["objects"]]:
+            out.extend(parte.split())
     out.extend(d["PHRASES"].values())
     vistos, res = set(), []
     for t in out:

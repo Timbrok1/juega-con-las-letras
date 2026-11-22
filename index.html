@@ -31,8 +31,8 @@ header h2{margin:0;font-size:18px;text-align:center;flex:1;line-height:1.15}
 .stars{font-size:18px;font-weight:800;background:#fff;padding:12px 10px;border-radius:18px;box-shadow:0 4px 0 rgba(0,0,0,.08);white-space:nowrap}
 h1{font-size:28px;margin:4px 0 0;text-align:center}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.game-btn{border:none;border-radius:26px;padding:16px 8px;color:#fff;font-size:19px;font-weight:800;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 6px 0 rgba(0,0,0,.15);min-height:150px;justify-content:center;line-height:1.15}
-.game-btn span{font-size:56px}
+.game-btn{border:none;border-radius:26px;padding:12px 8px;color:#fff;font-size:18px;font-weight:800;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:0 6px 0 rgba(0,0,0,.15);min-height:118px;justify-content:center;line-height:1.15}
+.game-btn span{font-size:46px}
 .wide{grid-column:1/3;min-height:90px;flex-direction:row;gap:12px}
 .wide span{font-size:40px}
 .big{border:none;border-radius:22px;padding:16px 22px;font-size:24px;font-weight:800;color:#fff;background:var(--c);box-shadow:0 6px 0 rgba(0,0,0,.15)}
@@ -103,10 +103,12 @@ input[type=range]{width:100%}
   </header>
   <h1>¡A jugar con las letras!</h1>
   <div class="grid">
+    <button class="game-btn" style="background:#26A69A" data-go="letra"><span>🔤</span>Encuentra la letra</button>
     <button class="game-btn" style="background:var(--a)" data-go="tren"><span>🚂</span>Tren de sílabas</button>
     <button class="game-btn" style="background:var(--b)" data-go="caza"><span>🫧</span>Caza la sílaba</button>
     <button class="game-btn" style="background:var(--c)" data-go="palabra"><span>🧩</span>Construye la palabra</button>
     <button class="game-btn" style="background:var(--e)" data-go="lee"><span>📖</span>Lee y elige</button>
+    <button class="game-btn" style="background:#5C6BC0" data-go="frase"><span>💬</span>Lee la frase</button>
     <button class="game-btn wide" style="background:var(--d)" data-go="amigos"><span>🐣</span>Mis amigos</button>
   </div>
   <p class="hint">Padres: mantén pulsado ⚙️ para elegir las letras que ya ha dado en clase.</p>
@@ -153,6 +155,24 @@ input[type=range]{width:100%}
     <div class="pic L" id="leeWord" style="font-size:64px;letter-spacing:2px;padding:18px 30px"></div>
     <p class="hint" style="margin:0">¿Qué dibujo es?</p>
     <div class="bubbles" id="leeOpts"></div>
+  </div>
+</section>
+
+<!-- ENCUENTRA LA LETRA -->
+<section class="screen" id="letra">
+  <header><button class="icon-btn" data-back>⬅️</button><h2>Encuentra la letra</h2><button class="icon-btn help" data-help aria-label="Instrucciones">❓</button><div class="stars" data-stars></div></header>
+  <div class="center">
+    <button class="speaker" id="letraSay">🔊</button>
+    <div class="bubbles" id="letraOpts"></div>
+  </div>
+</section>
+
+<!-- LEE LA FRASE -->
+<section class="screen" id="frase">
+  <header><button class="icon-btn" data-back>⬅️</button><h2>Lee la frase</h2><button class="icon-btn help" data-help aria-label="Instrucciones">❓</button><div class="stars" data-stars></div></header>
+  <div class="center">
+    <div class="pic L" id="fraseText" style="font-size:38px;line-height:1.25;padding:18px 22px;text-align:center"></div>
+    <div class="bubbles" id="fraseOpts"></div>
   </div>
 </section>
 
@@ -336,18 +356,18 @@ document.addEventListener('pointerdown',()=>{if(warmed)return;warmed=true;
 /* ---------- navegación ---------- */
 let current='home';
 function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id));current=id;enterT=Date.now();window.scrollTo(0,0);
-  if(id==='tren')initTren();if(id==='caza')initCaza();if(id==='palabra')newWord();if(id==='lee')newLee();if(id==='amigos'){renderPets();setTimeout(()=>{if(current==='amigos'&&!tappedSince())speakIntro('amigos',[]);},350);}if(id==='padres')renderPadres();}
+  if(id==='tren')initTren();if(id==='caza')initCaza();if(id==='palabra')newWord();if(id==='lee')newLee();if(id==='letra')initLetra();if(id==='frase')newFrase();if(id==='amigos'){renderPets();setTimeout(()=>{if(current==='amigos'&&!tappedSince())speakIntro('amigos',[]);},350);}if(id==='padres')renderPadres();}
 document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
 document.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>{stopVoice();go('home');});
 /* instrucciones habladas: la primera vez que entra en cada juego (en esta visita) y al pulsar ❓ */
-const INSTR={tren:PHRASES.instrTren,caza:PHRASES.instrCaza,palabra:PHRASES.instrPalabra,lee:PHRASES.instrLee,amigos:PHRASES.instrAmigos};
+const INSTR={tren:PHRASES.instrTren,caza:PHRASES.instrCaza,palabra:PHRASES.instrPalabra,lee:PHRASES.instrLee,amigos:PHRASES.instrAmigos,letra:PHRASES.instrLetra,frase:PHRASES.instrFrase};
 const introSeen=new Set();
 /* si toca algo antes de que empiece la instrucción, no se le corta lo que ha pedido */
 let enterT=0,lastTap=0;document.addEventListener('pointerdown',()=>{lastTap=Date.now();},{capture:true});
 const tappedSince=()=>lastTap>enterT;
 function speakIntro(id,parts,rate){const list=introSeen.has(id)?parts:[INSTR[id],...parts];introSeen.add(id);if(list.length)sayAll(list,rate,false,450);}
 document.querySelectorAll('[data-help]').forEach(b=>b.onclick=()=>{const id=current;
-  const extra=id==='caza'&&cTarget?[cTarget]:id==='palabra'&&pWord?[pWord.w]:[];sayAll([INSTR[id],...extra],null,false,450);});
+  const extra=id==='caza'&&cTarget?[cTarget]:id==='palabra'&&pWord?[pWord.w]:id==='letra'&&nTarget?[LNAME(nTarget)]:[];sayAll([INSTR[id],...extra],null,false,450);});
 
 /* ---------- estrellas y amigos ---------- */
 function renderStars(){document.querySelectorAll('[data-stars]').forEach(e=>e.textContent='⭐ '+S.stars);}
@@ -357,7 +377,7 @@ function addStar(){S.stars++;save();renderStars();
 $('mPet').onclick=()=>say(PHRASES.nuevoAmigo,0.85,true);
 $('mOk').onclick=()=>{$('modal').classList.remove('on');modalOn=false;
   /* retomar el juego: repetir lo que toca oír */
-  setTimeout(()=>{if(current==='caza'&&cTarget)say(cTarget);else if(current==='palabra'&&pWord)say(pWord.w,S.rate*0.9);},250);};
+  setTimeout(()=>{if(current==='caza'&&cTarget)say(cTarget);else if(current==='palabra'&&pWord)say(pWord.w,S.rate*0.9);else if(current==='letra'&&nTarget)say(LNAME(nTarget));},250);};
 function party(){const p=$('party');const em=['⭐','🎉','✨','🌟','🎈'];for(let i=0;i<14;i++){const s=document.createElement('span');s.textContent=rnd(em);s.style.left=Math.random()*95+'vw';s.style.animationDelay=(Math.random()*.4)+'s';p.appendChild(s);setTimeout(()=>s.remove(),2200);}}
 function renderPets(){const n=Math.min(Math.floor(S.stars/PER_PET),PETS.length);$('pets').innerHTML=PETS.map((p,i)=>`<div class="pet ${i<n?'':'lock'}">${i<n?p:'❔'}</div>`).join('');
   const rest=S.stars%PER_PET;$('petBar').style.width=(n>=PETS.length?100:rest/PER_PET*100)+'%';
@@ -452,6 +472,54 @@ function newLee(){lBusy=false;lFails=0;const ws=availWords();
       if(lFails>=2)sayAll(lWord.s,S.rate*0.75,false,350);}});
   setTimeout(()=>{if(current==='lee'&&!tappedSince())speakIntro('lee',[]);},350);}
 
+/* ---------- ENCUENTRA LA LETRA ----------
+   Suena el nombre de una letra («eme») y hay que tocarla. Vocales + consonantes activas.
+   2 opciones; 3 tras 3 aciertos a la primera seguidos; 4 tras 6. Se intenta que una de las
+   opciones se parezca a la letra buscada (M/N, b/d…), que es donde se equivocan. */
+const LNAME=c=>LETTER_NAMES[c]||c;
+const LOOKALIKE={M:'NW',N:'MÑ',Ñ:'N',W:'MV',B:'DPR',D:'BOP',P:'BRQ',Q:'PO',R:'PB',E:'F',F:'ET',T:'FL',L:'TI',I:'LJ',J:'I',O:'QCU',C:'GO',G:'CO',U:'VO',V:'UWY',Y:'V',H:'N',CH:'C',LL:'L',RR:'R'};
+let nTarget=null,nLast=null,nBusy=false,nMiss=0,nStreak=0;
+function initLetra(){nextLetra();}
+function nextLetra(){nBusy=false;nMiss=0;const pool=[...VOWELS,...S.cons],n=Math.min(pool.length,nStreak>=6?4:nStreak>=3?3:2);
+  let cand=pool.filter(x=>x!==nLast);if(!cand.length)cand=pool;nTarget=pickW(cand,x=>weight('n:'+x,x));nLast=nTarget;
+  const opts=[nTarget];const look=shuffle((LOOKALIKE[nTarget]||'').split('').concat(nTarget==='L'?['LL']:[],nTarget==='C'?['CH']:[],nTarget==='R'?['RR']:[]).filter(x=>pool.includes(x)));
+  if(look.length&&opts.length<n)opts.push(look[0]);
+  shuffle(pool).forEach(x=>{if(opts.length<n&&!opts.includes(x))opts.push(x);});
+  $('letraOpts').innerHTML=shuffle(opts).map((x,i)=>`<button class="bubble L" data-x="${x}" style="background:${COLORS[(i+2)%COLORS.length]}">${fmt(x)}</button>`).join('');
+  $('letraOpts').querySelectorAll('.bubble').forEach(b=>b.onclick=()=>{if(nBusy)return;
+    if(b.dataset.x===nTarget){nBusy=true;b.classList.add('ok');say(PHRASES.muyBien,0.9);
+      rec('n:'+nTarget,!nMiss);if(!nMiss){nStreak++;addStar();party();}setTimeout(nextLetra,1500);}
+    else{if(!nMiss)nStreak=Math.max(0,nStreak-3);nMiss++;b.classList.add('shake');setTimeout(()=>b.classList.remove('shake'),400);say(LNAME(nTarget));}});
+  setTimeout(()=>{if(current==='letra')speakIntro('letra',[LNAME(nTarget)]);},350);}
+$('letraSay').onclick=()=>nTarget&&say(LNAME(nTarget));
+
+/* ---------- LEE LA FRASE ----------
+   Frase escrita SIN audio («el sapo toma sopa») y 3 dibujos de pareja de emojis (🐸🍲).
+   Las opciones falsas comparten sujeto u objeto con la buena, así que hay que leer la frase
+   entera. Tras 2 fallos se leen las palabras despacio. Al acertar se lee la frase. */
+const FR=window.DATA.SENTENCES;
+const frases=()=>{const ok=okLetters(),out=[];
+  FR.subjects.forEach(([sj,se],i)=>FR.objects.forEach(([ob,oe],j)=>{const t=`${sj} ${FR.verb} ${ob}`;
+    /* cada palabra por separado: «el loro» no lleva LL */
+    if(t.split(' ').every(w=>tokens(w.toUpperCase()).every(ch=>ok.has(ch))))out.push({t,i,j,e:se+oe});}));return out;};
+let frObj=null,frLast=null,frFails=0,frBusy=false,frStreak=0;
+function newFrase(){frBusy=false;frFails=0;const fs=frases();
+  if(fs.length<2){$('fraseText').textContent='🙈';$('fraseOpts').innerHTML='<p class="hint">Faltan letras para formar frases. Activa más consonantes en ajustes.</p>';return;}
+  let c=fs.filter(f=>f.t!==frLast);if(!c.length)c=fs;frObj=pickW(c,f=>weight('f:'+f.t,f.t));frLast=frObj.t;
+  /* falsas: mismo sujeto y otro objeto; otro sujeto y mismo objeto; y si hace falta, otra cualquiera */
+  const sameS=shuffle(fs.filter(f=>f.i===frObj.i&&f.j!==frObj.j)),sameO=shuffle(fs.filter(f=>f.j===frObj.j&&f.i!==frObj.i));
+  const n=frStreak>=4?4:3,opts=[frObj];
+  [sameS[0],sameO[0],sameS[1],sameO[1],...shuffle(fs)].forEach(f=>{if(f&&opts.length<n&&!opts.some(o=>o.e===f.e))opts.push(f);});
+  $('fraseText').textContent=fmt(frObj.t.toUpperCase());
+  $('fraseOpts').innerHTML=shuffle(opts).map(f=>`<button class="bubble" data-t="${f.t}" style="background:#fff;font-size:44px;letter-spacing:-4px">${f.e}</button>`).join('');
+  $('fraseOpts').querySelectorAll('.bubble').forEach(b=>b.onclick=()=>{if(frBusy)return;
+    if(b.dataset.t===frObj.t){frBusy=true;b.classList.add('ok');sayAll([PHRASES.muyBien,...frObj.t.split(' ')],0.9,false,60);
+      rec('f:'+frObj.t,!frFails);frStreak=frFails?0:frStreak+1;if(!frFails){addStar();party();}setTimeout(newFrase,3200);}
+    else{b.classList.add('shake');setTimeout(()=>b.classList.remove('shake'),400);frFails++;
+      /* tras dos fallos, ayuda: se leen las palabras despacio */
+      if(frFails>=2)sayAll(frObj.t.split(' '),S.rate*0.8,false,350);}});
+  setTimeout(()=>{if(current==='frase'&&!tappedSince())speakIntro('frase',[]);},350);}
+
 /* ---------- PADRES ---------- */
 let pressT=null;const gear=$('gear');
 gear.addEventListener('pointerdown',()=>{gear.style.transform='scale(.9)';pressT=setTimeout(()=>{gear.style.transform='';go('padres');},1500);});
@@ -485,7 +553,7 @@ function renderPadres(){resetArmed=false;$('reset').textContent='Reiniciar estre
 $('setRate').oninput=e=>{S.rate=+e.target.value;$('rateVal').textContent=S.rate.toFixed(2);save();};
 $('testVoice').onclick=()=>sayAll(['MA','ME','MI','MO','MU','MAMÁ'],null,false,250);
 /* lo que más le cuesta: fallos recientes repetidos, según el historial */
-const SKILL={s:'oír',w:'construir',l:'leer'};
+const SKILL={s:'oír',w:'construir',l:'leer',n:'letras',f:'frases'};
 function renderHard(){statsArmed=false;$('resetStats').textContent='Borrar historial de aciertos y fallos';
   const hard=Object.entries(S.stats).filter(([k,v])=>v.n>=2&&v.e>=0.5).sort((a,b)=>b[1].e-a[1].e).slice(0,8);
   $('hardInfo').textContent=hard.length?'Lo que más le cuesta ahora: '+hard.map(([k])=>`${k.slice(2)} (${SKILL[k[0]]})`).join(', ')+'. Los juegos lo repiten más a menudo.'
