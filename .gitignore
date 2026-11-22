@@ -20,8 +20,14 @@ __pycache__/
 # Secretos (claves de APIs de voz)
 .env
 .env.*
+*.env
+*API_KEY*
 *.key
 credentials*.json
 
 # Temporales del generador de audio
 audio/.tmp/
+
+# Revisión de audios (tools/revisar_audios.py)
+revision.html
+revision.json

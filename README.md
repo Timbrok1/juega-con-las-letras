@@ -27,13 +27,15 @@ El progreso se guarda en `localStorage` del navegador.
 Abre la web en Safari → **Compartir** → **Añadir a pantalla de inicio**. Se abre a pantalla completa y, tras la primera carga con internet, funciona sin conexión (guarda los audios en el móvil). La app instalada lleva su propio progreso, distinto del de Safari.
 
 ## Audios
-Todo lo que dice el juego está pregrabado en `audio/` con [Piper](https://github.com/OHF-Voice/piper1-gpl) (voz neuronal local y gratuita). Al añadir palabras o frases en `data.js`, regenera lo que falte:
+Todo lo que dice el juego está pregrabado en `audio/` con la voz «Sarah» de [ElevenLabs](https://elevenlabs.io) (modelo v3, en español). Al añadir palabras o frases en `data.js`, regenera lo que falte:
 
 ```bash
-python3 -m venv ~/.venvs/juego-lectura
-~/.venvs/juego-lectura/bin/pip install -r tools/requirements.txt   # una vez (requiere ffmpeg)
-~/.venvs/juego-lectura/bin/python tools/generar_audios.py          # solo genera lo nuevo
+# una vez: crea .env en la raíz con la línea  ELEVENLABS_API_KEY=sk_...
+python3 tools/generar_audios.py                 # solo genera lo nuevo (requiere ffmpeg)
+python3 tools/generar_audios.py --rehacer ma    # otra toma de un audio que suene mal
 ```
+
+Alternativa gratuita y local (peor calidad): `--motor piper` (ver `tools/requirements.txt`).
 
 ## Publicación
 Se publica con GitHub Pages desde la rama `main` (carpeta raíz). Cada `git push` actualiza la web en uno o dos minutos.

@@ -57,17 +57,21 @@ Se abre manteniendo pulsado ⚙️ 1,5 s. Permite:
 - Si se aloja en otro sitio (GitHub Pages, etc.) y se quiere sincronizar entre dispositivos, hay que sustituir `initRemote()` por otro backend.
 
 ## Voz: audios pregenerados
-En iOS, `speechSynthesis` solo ofrece a las webs voces básicas (las Mejoradas/Premium y Siri no están disponibles), así que todo lo que dice el juego está grabado en `audio/*.mp3` con Piper (voz neuronal local).
+En iOS, `speechSynthesis` solo ofrece a las webs voces básicas, así que todo lo que dice el juego está grabado en `audio/*.mp3`.
 
-- **Generador**: `tools/generar_audios.py`. Lee `data.js` y crea un MP3 por texto: vocales, sílabas de todas las consonantes, palabras y sus sílabas, `CONTINUANT` y `PHRASES`. Es idempotente: solo regenera lo que falta o cambia (texto, fonemas, voz o ajustes). Escribe `audio/manifest.json` con `files` y `huellas`.
-- **Instalación** (una vez): `python3 -m venv ~/.venvs/juego-lectura && ~/.venvs/juego-lectura/bin/pip install -r tools/requirements.txt`. Hace falta `ffmpeg`. Las voces se descargan solas en `~/.local/share/piper-voces` (o en `$PIPER_VOCES`).
-- **Uso**: `~/.venvs/juego-lectura/bin/python tools/generar_audios.py` (opciones `--lista`, `--forzar`, `--limpiar`, `--voz`, `--hablante`). Voz por defecto `es_ES-davefx-medium` (masculina); alternativa `--voz es_ES-sharvard-medium --hablante F` (femenina).
-- **Al añadir palabras o frases a `data.js`, hay que ejecutar el generador** y subir los MP3 nuevos y el manifest.
-- **Fonemas forzados** (`entrada_piper()`): Piper deletrea algunas sílabas sueltas («rra» → «erre erre a», «xi» → «once», «mmm» → «eme eme eme»). Para esas se le pasan fonemas `[[...]]`. Los sonidos continuos se generan cortos y se estiran ×4 con `atempo` de ffmpeg (sin cambiar el tono). Si se añade una sílaba rara, revisar con `--lista` y con `PiperVoice.phonemize()`.
+- **Voz actual: ElevenLabs, «Sarah» (voz de serie `EXAVITQu4vr4xnSDxMaL`) con el modelo `eleven_v3` y `language_code: es`.** El padre la eligió a ciegas entre 6 voces de ElevenLabs y Piper: la versión v2 de Sarah sonaba a sílabas en inglés y Piper era poco natural. El plan gratuito de ElevenLabs NO permite usar por API las voces de la biblioteca (las nativas de España necesitan el plan Starter); las de serie sí.
+- **Clave**: `ELEVENLABS_API_KEY=…` en `.env` en la raíz (ignorado por git; el `.gitignore` también excluye `*.env` y `*API_KEY*`). La clave solo tiene permisos de Text to Speech y lectura de voces.
+- **Generador**: `tools/generar_audios.py` (solo usa la biblioteca estándar de Python y ffmpeg). Lee `data.js` y crea un MP3 por texto: vocales, sílabas de todas las consonantes, palabras y sus sílabas, `CONTINUANT` y `PHRASES` (258 audios, unos 1.100 caracteres; el plan gratuito da 10.000 al mes).
+  - Es idempotente: `recetas` (en el manifest) guarda un resumen de las entradas; solo regenera lo que cambia. `huellas` es el resumen del MP3 final y va en la URL (`?v=`), así el navegador y el service worker solo descargan de nuevo lo que cambia.
+  - Caché de respuestas de ElevenLabs en `~/.cache/juego-lectura/elevenlabs/`: rehacer el recorte no gasta créditos.
+  - `--rehacer TEXTO…` pide otra toma de esos textos. `--motor piper` vuelve a la voz local (ver abajo). `--lista`, `--forzar`, `--limpiar`.
+  - El modelo v3 a veces devuelve silencio o un clic con textos muy cortos («o», «ce», «lll»): `tiene_voz()` lo detecta y se reintenta con otra semilla, con variantes («o.», «¡o!», «lllll») y, en último caso, con `eleven_multilingual_v2`.
+  - ElevenLabs deja silencio y a veces una respiración o clic al final: `zona_de_voz()` corta desde el primer tramo con voz hasta el último que esté a menos de 20 dB del pico (tramos separados por pausas de 250 ms).
+- **Revisión**: `tools/revisar_audios.py` transcribe con Whisper (faster-whisper, en el venv) y crea `revision.html` (ignorado por git) con los dudosos. Es útil para palabras; con sílabas sueltas Whisper se inventa palabras en inglés y marca muchos falsos positivos.
+- **Piper** (alternativa local y gratuita, peor calidad): `pip install -r tools/requirements.txt` en `~/.venvs/juego-lectura`, y `--motor piper`. Necesita fonemas forzados (`Piper.entrada()`) porque deletrea «rra», lee «xi» como «once» y «mmm» como «eme eme eme»; los continuos se estiran ×4 con `atempo`.
 - **Nombres de archivo**: `clave()` en Python y `akey()` en `index.html` deben dar lo mismo (minúsculas, `ñ`→`ny`, vocal con tilde → vocal + `_`, el resto de signos → `-`). Ej.: `MAMÁ` → `mama_.mp3`, `¡Muy bien!` → `muy-bien.mp3`.
 - **En el juego**: `say(t)` / `sayAll([partes], rate, force, gap)`. Usan un único elemento `<audio>` reutilizado, que se desbloquea en iOS con el primer toque (silencio). Si no hay MP3 para un texto o falla la reproducción, se usa `speechSynthesis`. La velocidad del panel se aplica con `playbackRate` (0,8 = normal), conservando el tono. `stopVoice()` corta lo que suene; `sayGen` invalida las colas anteriores. Al arrancar se precargan los audios de las letras activas.
-- «¡Muy bien!» + sílaba/palabra y la ayuda de «Lee y elige» (sílabas despacio) se dicen con `sayAll` como archivos seguidos.
-- La voz del sistema elegida en el panel de padres solo se usa como respaldo.
+- **Al añadir palabras o frases a `data.js`, hay que ejecutar el generador** y subir los MP3 nuevos y el manifest.
 
 ## App instalable y sin conexión (PWA)
 - En el iPhone: Safari → Compartir → «Añadir a pantalla de inicio». Abre a pantalla completa. **La app instalada tiene su propio `localStorage`, distinto del de Safari**: el progreso no pasa de uno a otro.
