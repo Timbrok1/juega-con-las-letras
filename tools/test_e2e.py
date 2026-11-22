@@ -50,7 +50,7 @@ try:
     pg.click('[data-go=palabra]');pg.wait_for_timeout(600);pg.click('#pic');pg.wait_for_timeout(600);pg.click('#palabra [data-back]')
     pg.click('[data-go=lee]');pg.wait_for_timeout(300);w=pg.inner_text('#leeWord');pg.click('#lee [data-back]')
     pl=pg.evaluate('window.__played')
-    ok(any(x.startswith('mmm') for x in pl) and any(x.startswith('ma.mp3') for x in pl) and any(x.startswith('muy-bien') for x in pl),f'[{tag}] suenan MP3: {pl[:9]}')
+    ok(any(x.startswith('eme.mp3') for x in pl) and any(x.startswith('ma.mp3') for x in pl) and any(x.startswith('muy-bien') for x in pl),f'[{tag}] suenan MP3: {pl[:9]}')
     ok(len(w)>1,f'[{tag}] Lee y elige: {w}')
   juegos('con red');pg.screenshot(path=f'{OUT}/home.png')
   # fase 3: instrucciones con ❓ e historial de aciertos/fallos

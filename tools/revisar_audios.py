@@ -58,7 +58,7 @@ def main():
 
     modelo = WhisperModel(a.modelo, device="cpu", compute_type="int8")
     d = g.cargar_datos()
-    continuos = {v.lower() for v in d["CONTINUANT"].values()}
+    continuos = {v.lower() for v in d.get("CONTINUANT", {}).values()}  # sonidos largos (ya no se usan)
     dudosos, total = [], 0
     for t in g.textos(d):
         k = g.clave(t)

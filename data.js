@@ -2,12 +2,13 @@
    Lo que va detrás de «window.DATA=» debe ser JSON válido (comillas dobles,
    sin comas finales ni comentarios) para que Python lo pueda leer.
    Al añadir palabras o frases, ejecuta el generador para crear sus audios.
+   LETTER_NAMES: nombre de cada consonante (RAE); lo dice el Tren al tocarla.
    ORDER: orden en que se enseñan las consonantes (lo usa «Activar hasta…» del panel
    de padres). Es un orden habitual en cartillas; cámbialo si el cole sigue otro. */
 window.DATA={
  "VOWELS": ["A", "E", "I", "O", "U"],
  "ALL_CONS": ["B", "C", "CH", "D", "F", "G", "H", "J", "K", "L", "LL", "M", "N", "Ñ", "P", "Q", "R", "RR", "S", "T", "V", "W", "X", "Y", "Z"],
- "CONTINUANT": {"M": "mmm", "L": "lll", "S": "sss", "N": "nnn", "F": "fff", "Z": "zzz", "J": "jjj"},
+ "LETTER_NAMES": {"B": "be", "C": "ce", "CH": "che", "D": "de", "F": "efe", "G": "ge", "H": "hache", "J": "jota", "K": "ka", "L": "ele", "LL": "elle", "M": "eme", "N": "ene", "Ñ": "eñe", "P": "pe", "Q": "cu", "R": "erre", "RR": "erre doble", "S": "ese", "T": "te", "V": "uve", "W": "uve doble", "X": "equis", "Y": "ye", "Z": "zeta"},
  "ORDER": ["M", "P", "L", "S", "T", "D", "N", "F", "R", "B", "V", "C", "G", "J", "Ñ", "LL", "Y", "CH", "Z", "H", "Q", "K", "RR", "X", "W"],
  "PHRASES": {
   "muyBien": "¡Muy bien!",

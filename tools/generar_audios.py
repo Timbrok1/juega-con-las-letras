@@ -3,7 +3,7 @@
 
 Lee data.js y crea un MP3 por cada texto que el juego puede decir:
 vocales, sílabas de todas las consonantes, palabras y sus sílabas,
-sonidos continuos (mmm, sss...) y frases fijas.
+nombres de las letras (eme, ele...) y frases fijas.
 
 Motores:
   - google (por defecto): voz «es-ES-Chirp3-HD-Aoede» de Google Cloud Text-to-Speech,
@@ -171,7 +171,7 @@ def textos(d):
     for w in d["WORDS"]:
         out.append(w["w"])
         out.extend(w["s"])
-    out.extend(d["CONTINUANT"].values())
+    out.extend(d["LETTER_NAMES"].values())
     out.extend(d["PHRASES"].values())
     vistos, res = set(), []
     for t in out:
@@ -495,7 +495,7 @@ def main():
     a = ap.parse_args()
 
     d = cargar_datos()
-    continuos = {v.lower() for v in d["CONTINUANT"].values()}
+    continuos = {v.lower() for v in d.get("CONTINUANT", {}).values()}  # sonidos largos (ya no se usan)
     lista = textos(d)
 
     if a.lista:

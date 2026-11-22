@@ -213,7 +213,7 @@ input[type=range]{width:100%}
 <script src="data.js"></script>
 <script>
 /* letras, palabras y frases: en data.js (lo comparte el generador de audios) */
-const {VOWELS,ALL_CONS,CONTINUANT,WORDS,PHRASES,ORDER}=window.DATA;
+const {VOWELS,ALL_CONS,LETTER_NAMES,WORDS,PHRASES,ORDER}=window.DATA;
 const COLORS=['#FF7A59','#3DB5E6','#5DBB63','#F7B731','#A77BDB','#F06292'];
 const PETS=['🐣','🐢','🦖','🐙','🦄','🐳','🦊','🐝','🦉','🐬','🦋','🐲','🦔','🐧','🦁','🐼','🦩','🐨','🦕','🐞'];
 const PER_PET=5;
@@ -303,7 +303,7 @@ fetch('audio/manifest.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null).then
   if(document.getElementById('padres').classList.contains('on'))renderPadres();}).catch(()=>{});
 /* precarga los audios de las letras activas para que suenen sin retraso */
 function prefetchAudios(){if(!AUDIOS.size)return;const t=new Set([...VOWELS,...sylPool(),...Object.values(PHRASES)]);
-  S.cons.forEach(c=>CONTINUANT[c]&&t.add(CONTINUANT[c]));availWords().forEach(w=>{t.add(w.w);w.s.forEach(s=>t.add(s));});
+  S.cons.forEach(c=>t.add(LETTER_NAMES[c]));availWords().forEach(w=>{t.add(w.w);w.s.forEach(s=>t.add(s));});
   [...t].map(akey).filter(k=>AUDIOS.has(k)).forEach(k=>{try{fetch(audioUrl(k),{priority:'low'}).catch(()=>{});}catch(e){}});}
 /* un único elemento <audio> reutilizado: iOS solo deja reproducir sin toque si ya se desbloqueó con uno */
 const player=new Audio();player.preload='auto';
@@ -376,11 +376,12 @@ function initTren(){tC=null;tV=null;$('wag1').textContent='?';$('wag2').textCont
     $('consRow').querySelectorAll('.chip').forEach(x=>x.classList.toggle('sel',x===b));
     /* QU solo va con E/I: si la vocal elegida no vale, se quita */
     if(tV&&!syl(tC,tV)){tV=null;$('wag2').textContent='?';$('vowRow').querySelectorAll('.chip').forEach(x=>x.classList.remove('sel'));}
-    refreshVows();if(CONTINUANT[tC])say(CONTINUANT[tC],0.6);});
+    /* al tocar la consonante se oye su nombre («eme»); al juntar, la sílaba («mo») */
+    refreshVows();say(LETTER_NAMES[tC]);});
   $('vowRow').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{tV=b.dataset.v;$('wag2').textContent=fmt(tV);$('train').classList.remove('joined');
     $('vowRow').querySelectorAll('.chip').forEach(x=>x.classList.toggle('sel',x===b));say(tV);});
   setTimeout(()=>{if(current==='tren'&&!tappedSince())speakIntro('tren',[]);},350);}
-$('wag1').onclick=()=>{if(tC&&CONTINUANT[tC])say(CONTINUANT[tC],0.6);};
+$('wag1').onclick=()=>{if(tC)say(LETTER_NAMES[tC]);};
 $('wag2').onclick=()=>{if(tV)say(tV);};
 $('join').onclick=()=>{if(!tC||!tV||!syl(tC,tV)){$('join').classList.add('shake');setTimeout(()=>$('join').classList.remove('shake'),400);return;}
   const s=syl(tC,tV);const tr=$('train');tr.classList.remove('joined');void tr.offsetWidth;tr.classList.add('joined');say(s,S.rate*0.85);
