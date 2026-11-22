@@ -229,6 +229,9 @@ class Google:
         if t in continuos:
             return t  # se construyen aparte (ver _continuo)
         t = re.sub(r"^rr", "r", t)
+        # «Ci.» lo lee «ce-i» (como el número romano CI o como siglas); en España
+        # «zi» suena exactamente igual
+        t = {"ci": "zi"}.get(t, t)
         if es_silaba(t):
             return quitar_tildes(t).capitalize() + "."
         return t

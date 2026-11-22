@@ -402,7 +402,7 @@ function nextCaza(){cBusy=false;cMiss=0;const pool=sylPool();const n=cStreak>=6?
   const sh=shuffle(opts);
   $('bubbles').innerHTML=sh.map((s,i)=>`<button class="bubble L" data-s="${s}" style="background:${COLORS[(i+cRound)%COLORS.length]}">${fmt(s)}</button>`).join('');
   $('bubbles').querySelectorAll('.bubble').forEach(b=>b.onclick=()=>{if(cBusy)return;
-    if(b.dataset.s===cTarget){cBusy=true;b.classList.add('ok');sayAll([PHRASES.muyBien,cTarget],0.9);
+    if(b.dataset.s===cTarget){cBusy=true;b.classList.add('ok');say(PHRASES.muyBien,0.9);/* sin repetir la sílaba acertada: enseguida suena la nueva */
       /* la estrella solo si acierta a la primera */
       rec('s:'+cTarget,!cMiss);if(!cMiss){cStreak++;addStar();party();}cRound++;setTimeout(nextCaza,1600);}
     else{if(!cMiss)cStreak=Math.max(0,cStreak-3);cMiss++;b.classList.add('shake');setTimeout(()=>b.classList.remove('shake'),400);say(cTarget);}});
