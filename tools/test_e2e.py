@@ -41,7 +41,7 @@ try:
   ok(r['st']==206 and r['len']==100 and r['same'] and r['cr']==f"bytes 10-109/{r['size']}",f'Range -> {r}')
   def juegos(tag):
     pg.evaluate('window.__played=[]')
-    pg.click('[data-go=tren]');pg.click('#consRow .chip[data-c=M]');pg.wait_for_timeout(300);pg.click('#vowRow .chip[data-v=A]');pg.click('#join');pg.wait_for_timeout(2200);pg.click('#tren [data-back]')
+    pg.click('[data-go=tren]');pg.click('#consRow .chip[data-c=M]');pg.wait_for_timeout(300);pg.click('#vowRow .chip[data-v=A]');pg.click('#join');pg.wait_for_timeout(3500);pg.click('#tren [data-back]')
     pg.click('[data-go=caza]');pg.wait_for_timeout(700)
     for bb in pg.query_selector_all('#bubbles .bubble'):
       bb.click();pg.wait_for_timeout(300)
