@@ -6,10 +6,10 @@
      se descargan los que falten y se borran los que ya no están en audio/manifest.json.
    - Fuentes e iconos: primero la copia guardada.
    Sube VERSION si cambias este archivo o la lista APP. */
-const VERSION = 'v2';
+const VERSION = 'v3';
 const APP_CACHE = 'app-' + VERSION;
 const MEDIA_CACHE = 'media';
-const APP = ['./', 'index.html', 'data.js', 'manifest.webmanifest', 'audio/manifest.json',
+const APP = ['./', 'index.html', 'guia.html', 'data.js', 'manifest.webmanifest', 'audio/manifest.json',
   'fonts/andika-700.woff2', 'fonts/nunito.woff2',
   'icons/apple-touch-icon.png', 'icons/icon-192.png', 'icons/icon-512.png'];
 

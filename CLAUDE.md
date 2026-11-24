@@ -26,7 +26,7 @@ Sin build ni dependencias y sin nada cargado de fuera:
 - **Lee y elige**: palabra escrita SIN audio, elige el dibujo entre 3 (4 tras 4 aciertos seguidos, `lStreak`). Tras 2 fallos lee las sílabas despacio (nunca la palabra entera). ⭐ solo si acierta a la primera.
 - Si acierta tras fallar: «¡Muy bien!» y animación verde, pero sin estrella ni confeti.
 - **Lee la frase** (💬): frase escrita SIN audio, «sujeto + toma + objeto» (`SENTENCES` en `data.js`: 12 sujetos × 20 objetos), y 3 dibujos hechos con dos emojis (🐸🍲); 4 tras 4 aciertos seguidos. Las falsas comparten sujeto u objeto con la buena (👩🧳 / 👩⚽ / 👨🧳), así que hay que leer la frase entera. Tras 2 fallos se leen las palabras despacio; al acertar, «¡Muy bien!» y la frase palabra a palabra. Solo salen frases con todas sus letras activas (comprobando cada palabra por separado; no mira los tipos de sílaba). ⭐ solo a la primera. Historial `f:<frase>`.
-- **Mis amigos**: cada 5 ⭐ se desbloquea un personaje (emoji genérico).
+- **Mis amigos**: cada 5 ⭐ se desbloquea un personaje (emoji genérico). 60 amigos (`PETS`): los 20 primeros originales y 40 añadidos cuando el niño los consiguió todos. Añadir siempre al final para no cambiar los que ya tiene.
 
 
 ### Panel de padres
@@ -78,6 +78,10 @@ En iOS, `speechSynthesis` solo ofrece a las webs voces básicas, así que todo l
 - **Nombres de archivo**: `clave()` en Python y `akey()` en `index.html` deben dar lo mismo (minúsculas, `ñ`→`ny`, vocal con tilde → vocal + `_`, el resto de signos → `-`). Ej.: `MAMÁ` → `mama_.mp3`, `¡Muy bien!` → `muy-bien.mp3`.
 - **En el juego**: `say(t)` / `sayAll([partes], rate, force, gap)`. Usan un único elemento `<audio>` reutilizado, que se desbloquea en iOS con el primer toque (silencio). Si no hay MP3 para un texto o falla la reproducción, se usa `speechSynthesis`. La velocidad del panel se aplica con `playbackRate` (0,8 = normal), conservando el tono. `stopVoice()` corta lo que suene; `sayGen` invalida las colas anteriores. Al arrancar se precargan los audios de las letras activas.
 - **Al añadir palabras o frases a `data.js`, hay que ejecutar el generador** y subir los MP3 nuevos y el manifest.
+
+## Guía para familias
+- `guia.html` (https://timbrok1.github.io/juega-con-las-letras/guia.html): página para compartir el juego con otras familias: instalar, elegir letras, juegos, cómo funciona y preguntas frecuentes. Enlazada desde el panel de padres y guardada por el service worker. Actualizarla si cambian los juegos o el panel.
+- Compartir no necesita login: cada móvil guarda su progreso y sus ajustes. El padre descartó los perfiles «¿Quién juega?».
 
 ## Versiones y caché
 - `index.html` carga `data.js?v=<resumen>`; el resumen lo pone `generar_audios.py` (`version_data_js()`) cada vez que se ejecuta. **Ejecutar el generador tras cualquier cambio en `data.js`**, aunque no haya audios nuevos.

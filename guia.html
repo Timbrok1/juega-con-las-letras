@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Guía para familias</title>
+<meta name="description" content="Cómo instalar y usar «Juega con las letras», un juego para practicar la lectura en casa.">
+<meta name="theme-color" content="#FF7A59">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<style>
+@font-face{font-family:'Andika';font-weight:700;font-style:normal;font-display:swap;src:url(fonts/andika-700.woff2) format('woff2')}
+@font-face{font-family:'Nunito';font-weight:200 1000;font-style:normal;font-display:swap;src:url(fonts/nunito.woff2) format('woff2')}
+:root{--bg:#FFF8EC;--card:#fff;--ink:#2B2B3A;--muted:#6b6b7a;--a:#FF7A59;--b:#3DB5E6;--c:#5DBB63;--d:#F7B731;--e:#A77BDB;--f:#26A69A;--g:#5C6BC0;--line:#eee3cf}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1d1d24;--card:#2a2a33;--ink:#f1f1f4;--muted:#a9a9b6;--line:#3a3a46}}
+:root[data-theme="dark"]{--bg:#1d1d24;--card:#2a2a33;--ink:#f1f1f4;--muted:#a9a9b6;--line:#3a3a46}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'Nunito',system-ui,sans-serif;font-weight:600;line-height:1.5}
+main{max-width:680px;margin:0 auto;padding:max(16px,env(safe-area-inset-top)) 16px 48px}
+.hero{text-align:center;padding:20px 0 8px}
+.hero img{width:84px;height:84px;border-radius:20px;box-shadow:0 6px 0 rgba(0,0,0,.08)}
+h1{font-size:28px;line-height:1.15;margin:14px 0 6px;font-weight:800}
+.sub{color:var(--muted);margin:0 auto;max-width:520px}
+.cta{display:inline-block;margin:18px 0 4px;background:var(--a);color:#fff;text-decoration:none;font-weight:800;font-size:19px;padding:14px 22px;border-radius:18px;box-shadow:0 5px 0 rgba(0,0,0,.15)}
+section{background:var(--card);border-radius:22px;padding:18px 18px 14px;margin:16px 0;box-shadow:0 4px 0 rgba(0,0,0,.05)}
+h2{font-size:21px;margin:0 0 10px;font-weight:800;display:flex;align-items:center;gap:10px}
+h2 .n{flex:none;width:32px;height:32px;border-radius:50%;background:var(--a);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+p{margin:0 0 10px}
+ol,ul{margin:0 0 10px;padding-left:22px}
+li{margin:4px 0}
+b{font-weight:800}
+.k{display:inline-block;border:2px solid var(--line);border-radius:8px;padding:0 7px;font-weight:800;white-space:nowrap}
+.games{display:grid;gap:10px;margin:4px 0 6px}
+.game{display:flex;gap:12px;align-items:flex-start;border-radius:16px;padding:10px 12px;background:color-mix(in srgb,var(--col) 14%,transparent)}
+.game .ic{flex:none;width:46px;height:46px;border-radius:14px;background:var(--col);display:flex;align-items:center;justify-content:center;font-size:26px}
+.game h3{margin:0;font-size:17px;font-weight:800}
+.game p{margin:2px 0 0;color:var(--ink);opacity:.85;font-size:15px}
+.tip{border-left:4px solid var(--d);padding:6px 0 6px 12px;margin:10px 0;color:var(--ink)}
+.letters{font-family:'Andika',sans-serif;font-weight:700;font-size:20px;letter-spacing:1px}
+.muted{color:var(--muted);font-size:14px}
+footer{text-align:center;color:var(--muted);font-size:14px;margin-top:24px}
+a{color:var(--g)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) a{color:#9fa8ff}}
+a.cta{color:#fff}
+</style>
+</head>
+<body>
+<main>
+
+<div class="hero">
+  <img src="icons/icon-192.png" alt="">
+  <h1>Juega con las letras</h1>
+  <p class="sub">Juegos para practicar la lectura en casa, con sílabas, al ritmo de lo que se da en clase. Para niños de 4–5 años que aún no leen instrucciones: todo se explica con voz y dibujos.</p>
+  <a class="cta" href="./">▶ Abrir el juego</a>
+</div>
+
+<section>
+  <h2><span class="n">1</span>Instalarlo en el móvil</h2>
+  <p><b>iPhone:</b> abre el enlace en <b>Safari</b>, pulsa <b>Compartir</b> (el cuadrado con la flecha ⬆️) y elige <b>«Añadir a pantalla de inicio»</b>.</p>
+  <p><b>Android:</b> ábrelo en <b>Chrome</b>, pulsa el menú <span class="k">⋮</span> y elige <b>«Instalar aplicación»</b> o «Añadir a pantalla de inicio».</p>
+  <p>Aparecerá un icono como una app más. Se abre a pantalla completa y, después de abrirlo una vez con internet, <b>funciona sin conexión</b>.</p>
+  <p class="muted">Usa siempre el icono: la app instalada guarda su propio progreso, distinto del de Safari.</p>
+</section>
+
+<section>
+  <h2><span class="n">2</span>Elegir las letras que ya conoce</h2>
+  <p>Es lo primero que hay que hacer, y lo más importante: los juegos solo usan las letras que actives.</p>
+  <ol>
+    <li>En la pantalla principal, <b>mantén pulsado ⚙️ durante un segundo y medio</b>. Así el niño no entra por accidente.</li>
+    <li>En «Consonantes que ya conoce», <b>toca las letras que ya han dado en clase</b>. Las vocales están siempre activas.</li>
+    <li>Cada vez que en clase den una letra nueva, actívala. Quedará marcada como <b>«nueva»</b> y saldrá el doble de veces.</li>
+  </ol>
+  <p>Las letras aparecen en el orden habitual de las cartillas:</p>
+  <p class="letters">M · P · L · S · T · D · N · F · R · B · V · C · G · J · Ñ · LL · Y · CH · Z · H · Q · K · RR · X · W</p>
+  <p>En el mismo panel puedes elegir <b>mayúsculas o minúsculas</b>, el tipo de letra, la <b>velocidad de la voz</b> y si las palabras pueden tener sílabas más difíciles (SOL, FRESA, FUEGO). Al principio, mejor solo las sílabas sencillas (MA, PE, LO).</p>
+</section>
+
+<section>
+  <h2><span class="n">3</span>Los juegos</h2>
+  <p>Están ordenados de más fácil a más difícil. Al entrar en cada uno, una voz explica qué hay que hacer; el botón <span class="k">❓</span> lo repite.</p>
+  <div class="games">
+    <div class="game" style="--col:var(--f)"><div class="ic">🔤</div><div><h3>Encuentra la letra</h3><p>Suena «eme» y hay que tocar la M.</p></div></div>
+    <div class="game" style="--col:var(--a)"><div class="ic">🚂</div><div><h3>Tren de sílabas</h3><p>Elige una consonante («eme») y una vocal («a») y pulsa «Juntar»: «la eme con la a… ma».</p></div></div>
+    <div class="game" style="--col:var(--b)"><div class="ic">🫧</div><div><h3>Caza la sílaba</h3><p>Suena una sílaba y hay que tocar la burbuja que la tiene.</p></div></div>
+    <div class="game" style="--col:var(--c)"><div class="ic">🧩</div><div><h3>Construye la palabra</h3><p>Sale un dibujo, suena la palabra y hay que tocar sus sílabas en orden.</p></div></div>
+    <div class="game" style="--col:var(--e)"><div class="ic">📖</div><div><h3>Lee y elige</h3><p>Una palabra escrita, sin voz: hay que leerla y tocar su dibujo.</p></div></div>
+    <div class="game" style="--col:var(--g)"><div class="ic">💬</div><div><h3>Lee la frase</h3><p>Una frase corta («el sapo toma sopa») y tres dibujos: hay que leerla entera para acertar.</p></div></div>
+    <div class="game" style="--col:var(--d)"><div class="ic">🐣</div><div><h3>Mis amigos</h3><p>Cada 5 estrellas se consigue un amigo nuevo.</p></div></div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">4</span>Cómo funciona</h2>
+  <ul>
+    <li><b>Equivocarse no se castiga:</b> el botón tiembla y se repite el sonido para que lo intente otra vez.</li>
+    <li><b>Las estrellas se ganan acertando a la primera</b>, para que no valga tocar al azar.</li>
+    <li><b>Se adapta solo:</b> lo que más le cuesta sale más a menudo, y si acierta seguido aparecen más opciones. En el panel de padres verás «Lo que más le cuesta ahora».</li>
+  </ul>
+  <div class="tip"><b>Consejo:</b> mejor ratos cortos, unos 10 minutos, y a ser posible a su lado las primeras veces. No hace falta ir más rápido que en clase.</div>
+</section>
+
+<section>
+  <h2><span class="n">5</span>Preguntas frecuentes</h2>
+  <p><b>No se oye nada.</b> Sube el volumen y toca cualquier botón: el móvil no deja sonar nada hasta que se toca la pantalla. Si sigue sin sonar, comprueba que el iPhone no esté en silencio.</p>
+  <p><b>¿Mis datos van a algún sitio?</b> No. No hay cuentas ni registros: el progreso y los ajustes se guardan solo en el móvil. Si borras los datos de navegación o desinstalas el icono, se pierden.</p>
+  <p><b>¿Puedo usarlo en varios móviles?</b> Sí, pero cada uno lleva su propio progreso y sus propias letras.</p>
+  <p><b>¿Cuesta algo?</b> No. Es gratis y sin anuncios.</p>
+</section>
+
+<footer>Hecho en casa para practicar la lectura. 📚</footer>
+
+</main>
+</body>
+</html>

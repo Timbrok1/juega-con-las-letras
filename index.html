@@ -214,6 +214,8 @@ input[type=range]{width:100%}
   </div>
   <div class="panel">
     <h3>Instalar y usar sin conexión</h3>
+    <a class="big" href="guia.html" style="background:var(--e);font-size:18px;text-align:center;text-decoration:none">📄 Guía para familias</a>
+    <p class="hint" style="text-align:left;margin:0">Para compartir el juego con otra familia, mándale este enlace: <b>timbrok1.github.io/juega-con-las-letras/guia.html</b></p>
     <p class="hint" id="installInfo" style="text-align:left;margin:0;opacity:.85;font-size:15px"></p>
     <p class="hint" id="offlineInfo" style="text-align:left;margin:0;opacity:.85;font-size:15px"></p>
   </div>
@@ -234,7 +236,9 @@ input[type=range]{width:100%}
 /* letras, palabras y frases: en data.js (lo comparte el generador de audios) */
 const {VOWELS,ALL_CONS,LETTER_NAMES,WORDS,PHRASES,ORDER,JOIN}=window.DATA;
 const COLORS=['#FF7A59','#3DB5E6','#5DBB63','#F7B731','#A77BDB','#F06292'];
-const PETS=['🐣','🐢','🦖','🐙','🦄','🐳','🦊','🐝','🦉','🐬','🦋','🐲','🦔','🐧','🦁','🐼','🦩','🐨','🦕','🐞'];
+/* amigos: cada PER_PET estrellas uno nuevo. Añadir siempre AL FINAL para no cambiar los que ya tiene */
+const PETS=['🐣','🐢','🦖','🐙','🦄','🐳','🦊','🐝','🦉','🐬','🦋','🐲','🦔','🐧','🦁','🐼','🦩','🐨','🦕','🐞',
+  '🐸','🐰','🐘','🦒','🦓','🦘','🦥','🦦','🐊','🦜','🦚','🦢','🐿️','🦫','🐹','🐻','🐯','🐷','🐮','🐔','🦆','🦅','🐺','🐴','🐌','🦀','🦞','🐠','🐡','🦈','🪼','🦑','🐋','🦭','🐻‍❄️','🦝','🐒','🦙','🦬','🐫'];
 const PER_PET=5;
 
 /* ---------- estado ---------- */
